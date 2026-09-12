@@ -6,10 +6,13 @@
     "dev": "TZ=UTC next dev",
     "build": "next build",
     "start": "TZ=UTC next start",
+    "setup": "npm ci && npm run db:reset && npm run seed",
+    "db:reset": "tsx scripts/reset.ts",
+    "seed": "tsx scripts/seed.ts",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run --passWithNoTests",
-    "test:tz": "TZ=UTC vitest run --passWithNoTests && TZ=America/Argentina/Buenos_Aires vitest run --passWithNoTests && TZ=Asia/Tokyo vitest run --passWithNoTests && TZ=Pacific/Chatham vitest run --passWithNoTests"
+    "test": "vitest run",
+    "test:tz": "TZ=UTC vitest run && TZ=America/Argentina/Buenos_Aires vitest run && TZ=Asia/Tokyo vitest run && TZ=Pacific/Chatham vitest run"
   },
   "dependencies": {
     "next": "16.3.5",

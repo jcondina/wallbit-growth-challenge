@@ -176,6 +176,7 @@ under any timezone and what you can extend live without touching I/O.
 │   │       ├── deposits.ts
 │   │       └── events.ts
 │   ├── services/
+│   │   ├── seed.ts               fixtures → tables + enrollment (CLI in scripts/seed.ts)
 │   │   ├── enrollUser.ts         getOrCreateAssignment (eligibility-gated, status-gated)
 │   │   ├── ingestWebhook.ts      verify → parse → inbox → reduce → upsert → emit
 │   │   ├── trackEvent.ts         validate against catalogue, stamp, store
@@ -213,7 +214,7 @@ under any timezone and what you can extend live without touching I/O.
 │   ├── replay.test.ts            whole scenario through the reducer in-process → 210/600 and split
 │   └── architecture.test.ts      greps src/domain for Date usage outside time.ts
 ├── var/                          sqlite file (gitignored)
-├── .env.example  .nvmrc  next.config.ts  vitest.config.ts  tsconfig.json  package.json
+├── .env.example  .nvmrc  next.config.ts  vitest.config.mts  tsconfig.json  package.json
 ```
 
 ### 2.3 Data model (`src/infra/schema.sql`)
@@ -819,7 +820,7 @@ counted on the dashboard. No logging library.
 
 No time budget. A phase is done when its acceptance holds and its commit is in.
 
-**Phase 0 — Scaffold.**
+**Phase 0 — Scaffold.** ✅ `phase-0` commit (41a5031).
 `create-next-app@latest` (TS, ESLint, Tailwind, `src/`, App Router, alias
 `@/*`, no React Compiler) generated in the scratchpad and moved in (the CLI
 refuses a non-empty directory); `vitest` + `tsx` + `zod`; scripts; `.nvmrc`;
@@ -827,11 +828,19 @@ refuses a non-empty directory); `vitest` + `tsx` + `zod`; scripts; `.nvmrc`;
 README skeleton. *Accept:* `npm run dev` serves a page; `npm test` runs an
 empty suite; lint clean.
 
-**Phase 1 — Time, DB, seed.**
+**Phase 1 — Time, DB, seed.** ✅ `phase-1` commit.
 `domain/time.ts` + tests; `infra/db.ts`, `schema.sql`, repos; `scripts/seed.ts`,
 `reset.ts`; `/api/health`. *Accept:* `npm run seed` prints 1200 users / 16
 methods / 201 historical deposits / 600 assignments; running it again changes
 nothing; `architecture.test.ts` passes.
+*As built:* `domain/experiment.ts`, `domain/assignment.ts` and the
+`domain/events.ts` skeleton (envelope + system/webhook events) came forward
+from Phase 2 because the seed enrolls users. Seed logic lives in
+`services/seed.ts` (testable on `:memory:`); `scripts/seed.ts` is the CLI.
+`infra/db.ts` exposes `queryAll/queryOne/queryRow` because `node:sqlite` types
+rows as `Record<string, SQLOutputValue>`. Turbopack warns that the
+runtime-configurable DB path defeats output-file tracing — irrelevant without
+a standalone deploy, noted here so nobody chases it.
 
 **Phase 2 — Domain rules.**
 `experiment`, `assignment`, `recommendation`, `deposit`, `activation` + tests.
