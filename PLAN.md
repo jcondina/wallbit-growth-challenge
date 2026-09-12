@@ -77,6 +77,10 @@ Grouped, with the one-line rationale. Details in the relevant section.
 ### Engineering
 - Next.js 16 (App Router, TS, `src/`), Tailwind v4, `node:sqlite`, `zod`,
   `vitest`, `tsx` for scripts. npm. Node 24 (`.nvmrc`), `engines >= 22.18`.
+- Next 16 conventions (from the bundled docs): `params`/`searchParams` are
+  promises; GET route handlers are dynamic by default; pages that read the DB
+  call `await connection()` first so `next build` never prerenders a snapshot
+  (`export const dynamic` is gone under Cache Components). Turbopack default.
 - `node:sqlite` over `better-sqlite3`: zero native build, zero install risk
   for whoever clones (verified on Node 24: no warning, `CHECK`, generated
   columns, WAL all work). Transactions via `BEGIN IMMEDIATE` / `COMMIT`.
@@ -740,7 +744,7 @@ guardrail; `<html lang="es">`; visible focus rings.
 | Results | ten country cuts, one "wins" by chance | small-n tag + note, collapsed |
 | Tracking | `<Link>` prefetch renders the page | assignment server-side, exposure client-side, `prefetch={false}` |
 | Tracking | StrictMode double effect | `useRef` + `event_id` dedupe |
-| Next | `/results` statically prerendered by `next build` | `export const dynamic = 'force-dynamic'` |
+| Next | `/results` statically prerendered by `next build` | `await connection()` before every DB read in pages (Next 16 removed `force-dynamic` under Cache Components; `connection()` works in both models) |
 | Next | cold compile > 10s simulator timeout | `replay.sh` warm-up |
 | Next | HMR reopens DB | `globalThis` cache, `IF NOT EXISTS` |
 | Simulator | silent partial run | README uses `--stop-on-error` |

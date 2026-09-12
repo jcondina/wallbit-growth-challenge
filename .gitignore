@@ -1,30 +1,33 @@
 # dependencies
-node_modules/
+/node_modules
+
+# testing
+/coverage
 
 # next.js
-.next/
-out/
+/.next/
+/out/
+/build
 next-env.d.ts
 *.tsbuildinfo
 
-# database (created by `npm run seed`)
-var/
+# database (created by `npm run seed`; `npm run db:reset` deletes it)
+/var/
 *.db
 *.db-wal
 *.db-shm
 
-# env
-.env
-.env.local
-.env.*.local
+# env files (.env.example is committed)
+.env*
+!.env.example
 
-# tests / tooling
-coverage/
-.eslintcache
-
-# os / editors
+# misc
 .DS_Store
-Thumbs.db
+*.pem
+npm-debug.log*
+.eslintcache
 .idea/
 .vscode/
-npm-debug.log*
+
+# claude code local config
+.claude/
