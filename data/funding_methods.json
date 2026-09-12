@@ -1,0 +1,182 @@
+[
+  {
+    "id": "local_ar",
+    "name": "Transferencia en pesos (Argentina)",
+    "kind": "local_transfer",
+    "currency": "ARS",
+    "countries": [
+      "AR"
+    ],
+    "settlement_hours": 24,
+    "fee_pct": 0.0
+  },
+  {
+    "id": "local_mx",
+    "name": "Transferencia SPEI (México)",
+    "kind": "local_transfer",
+    "currency": "MXN",
+    "countries": [
+      "MX"
+    ],
+    "settlement_hours": 24,
+    "fee_pct": 0.0
+  },
+  {
+    "id": "local_co",
+    "name": "Transferencia PSE (Colombia)",
+    "kind": "local_transfer",
+    "currency": "COP",
+    "countries": [
+      "CO"
+    ],
+    "settlement_hours": 24,
+    "fee_pct": 0.0
+  },
+  {
+    "id": "local_br",
+    "name": "Transferencia PIX (Brasil)",
+    "kind": "local_transfer",
+    "currency": "BRL",
+    "countries": [
+      "BR"
+    ],
+    "settlement_hours": 6,
+    "fee_pct": 0.0
+  },
+  {
+    "id": "local_pe",
+    "name": "Transferencia local (Perú)",
+    "kind": "local_transfer",
+    "currency": "PEN",
+    "countries": [
+      "PE"
+    ],
+    "settlement_hours": 36,
+    "fee_pct": 0.0
+  },
+  {
+    "id": "local_bo",
+    "name": "Transferencia local (Bolivia)",
+    "kind": "local_transfer",
+    "currency": "BOB",
+    "countries": [
+      "BO"
+    ],
+    "settlement_hours": 48,
+    "fee_pct": 0.0
+  },
+  {
+    "id": "local_gt",
+    "name": "Transferencia local (Guatemala)",
+    "kind": "local_transfer",
+    "currency": "GTQ",
+    "countries": [
+      "GT"
+    ],
+    "settlement_hours": 48,
+    "fee_pct": 0.0
+  },
+  {
+    "id": "local_do",
+    "name": "Transferencia local (Rep. Dominicana)",
+    "kind": "local_transfer",
+    "currency": "DOP",
+    "countries": [
+      "DO"
+    ],
+    "settlement_hours": 48,
+    "fee_pct": 0.0
+  },
+  {
+    "id": "ach_us",
+    "name": "Transferencia ACH (EE.UU.)",
+    "kind": "bank_transfer",
+    "currency": "USD",
+    "countries": [
+      "US"
+    ],
+    "settlement_hours": 72,
+    "fee_pct": 0.0
+  },
+  {
+    "id": "wire_us",
+    "name": "Transferencia Wire (EE.UU. e internacional)",
+    "kind": "bank_transfer",
+    "currency": "USD",
+    "countries": [
+      "*"
+    ],
+    "settlement_hours": 48,
+    "fee_pct": 0.0
+  },
+  {
+    "id": "sepa_eu",
+    "name": "Transferencia SEPA (Europa)",
+    "kind": "bank_transfer",
+    "currency": "EUR",
+    "countries": [
+      "ES",
+      "IT",
+      "DE",
+      "FR",
+      "PT"
+    ],
+    "settlement_hours": 48,
+    "fee_pct": 0.0
+  },
+  {
+    "id": "crypto_usdt",
+    "name": "USDT (Ethereum, Tron, Polygon, BSC)",
+    "kind": "crypto",
+    "currency": "USDT",
+    "countries": [
+      "*"
+    ],
+    "settlement_hours": 1,
+    "fee_pct": 0.0
+  },
+  {
+    "id": "crypto_usdc",
+    "name": "USDC (Ethereum, Tron, Polygon, Base)",
+    "kind": "crypto",
+    "currency": "USDC",
+    "countries": [
+      "*"
+    ],
+    "settlement_hours": 1,
+    "fee_pct": 0.0
+  },
+  {
+    "id": "paypal",
+    "name": "PayPal",
+    "kind": "third_party",
+    "currency": "USD",
+    "countries": [
+      "*"
+    ],
+    "settlement_hours": 24,
+    "fee_pct": 1.5
+  },
+  {
+    "id": "wise",
+    "name": "Wise",
+    "kind": "third_party",
+    "currency": "USD",
+    "countries": [
+      "*"
+    ],
+    "settlement_hours": 24,
+    "fee_pct": 0.8
+  },
+  {
+    "id": "payoneer",
+    "name": "Payoneer",
+    "kind": "third_party",
+    "currency": "USD",
+    "countries": [
+      "*"
+    ],
+    "settlement_hours": 24,
+    "fee_pct": 1.0
+  }
+]

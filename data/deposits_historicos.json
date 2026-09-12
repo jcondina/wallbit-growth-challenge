@@ -1,0 +1,1811 @@
+[
+  {
+    "id": "dep_000001",
+    "user_id": "usr_000466",
+    "method_id": "crypto_usdc",
+    "amount_usd": 199.23,
+    "status": "completed",
+    "created_at": "2026-05-02T11:48:36Z",
+    "completed_at": "2026-05-02T15:23:23Z"
+  },
+  {
+    "id": "dep_000002",
+    "user_id": "usr_000048",
+    "method_id": "wire_us",
+    "amount_usd": 882.61,
+    "status": "completed",
+    "created_at": "2026-05-07T08:22:03Z",
+    "completed_at": "2026-05-08T07:37:17Z"
+  },
+  {
+    "id": "dep_000003",
+    "user_id": "usr_000548",
+    "method_id": "payoneer",
+    "amount_usd": 469.93,
+    "status": "completed",
+    "created_at": "2026-05-02T08:59:59Z",
+    "completed_at": "2026-05-04T00:17:25Z"
+  },
+  {
+    "id": "dep_000004",
+    "user_id": "usr_000066",
+    "method_id": "paypal",
+    "amount_usd": 1131.74,
+    "status": "completed",
+    "created_at": "2026-05-10T11:59:16Z",
+    "completed_at": "2026-05-12T15:52:31Z"
+  },
+  {
+    "id": "dep_000005",
+    "user_id": "usr_000443",
+    "method_id": "payoneer",
+    "amount_usd": 173.67,
+    "status": "completed",
+    "created_at": "2026-05-04T02:28:33Z",
+    "completed_at": "2026-05-05T23:15:23Z"
+  },
+  {
+    "id": "dep_000006",
+    "user_id": "usr_000223",
+    "method_id": "crypto_usdc",
+    "amount_usd": 195.36,
+    "status": "completed",
+    "created_at": "2026-05-03T11:56:55Z",
+    "completed_at": "2026-05-05T14:01:33Z"
+  },
+  {
+    "id": "dep_000007",
+    "user_id": "usr_000439",
+    "method_id": "paypal",
+    "amount_usd": 599.31,
+    "status": "completed",
+    "created_at": "2026-05-11T01:24:32Z",
+    "completed_at": "2026-05-12T06:19:32Z"
+  },
+  {
+    "id": "dep_000008",
+    "user_id": "usr_000013",
+    "method_id": "wire_us",
+    "amount_usd": 62.66,
+    "status": "completed",
+    "created_at": "2026-05-04T23:17:44Z",
+    "completed_at": "2026-05-05T19:36:52Z"
+  },
+  {
+    "id": "dep_000009",
+    "user_id": "usr_000292",
+    "method_id": "wise",
+    "amount_usd": 560.97,
+    "status": "completed",
+    "created_at": "2026-05-08T13:16:32Z",
+    "completed_at": "2026-05-10T09:02:53Z"
+  },
+  {
+    "id": "dep_000010",
+    "user_id": "usr_000267",
+    "method_id": "wire_us",
+    "amount_usd": 567.01,
+    "status": "completed",
+    "created_at": "2026-05-13T03:37:59Z",
+    "completed_at": "2026-05-13T07:51:11Z"
+  },
+  {
+    "id": "dep_000011",
+    "user_id": "usr_000568",
+    "method_id": "paypal",
+    "amount_usd": 283.67,
+    "status": "completed",
+    "created_at": "2026-05-10T18:34:57Z",
+    "completed_at": "2026-05-11T22:09:06Z"
+  },
+  {
+    "id": "dep_000012",
+    "user_id": "usr_000510",
+    "method_id": "crypto_usdt",
+    "amount_usd": 215.72,
+    "status": "completed",
+    "created_at": "2026-05-16T09:10:19Z",
+    "completed_at": "2026-05-17T14:51:18Z"
+  },
+  {
+    "id": "dep_000013",
+    "user_id": "usr_000595",
+    "method_id": "local_mx",
+    "amount_usd": 198.44,
+    "status": "completed",
+    "created_at": "2026-05-12T09:09:46Z",
+    "completed_at": "2026-05-13T18:35:24Z"
+  },
+  {
+    "id": "dep_000014",
+    "user_id": "usr_000069",
+    "method_id": "wise",
+    "amount_usd": 534.91,
+    "status": "completed",
+    "created_at": "2026-05-16T03:21:20Z",
+    "completed_at": "2026-05-17T08:45:30Z"
+  },
+  {
+    "id": "dep_000015",
+    "user_id": "usr_000491",
+    "method_id": "paypal",
+    "amount_usd": 782.08,
+    "status": "completed",
+    "created_at": "2026-05-13T10:18:39Z",
+    "completed_at": "2026-05-15T07:10:48Z"
+  },
+  {
+    "id": "dep_000016",
+    "user_id": "usr_000344",
+    "method_id": "local_pe",
+    "amount_usd": 126.26,
+    "status": "completed",
+    "created_at": "2026-05-12T07:03:03Z",
+    "completed_at": "2026-05-12T10:50:19Z"
+  },
+  {
+    "id": "dep_000017",
+    "user_id": "usr_000306",
+    "method_id": "payoneer",
+    "amount_usd": 107.05,
+    "status": "completed",
+    "created_at": "2026-05-12T21:40:45Z",
+    "completed_at": "2026-05-15T07:26:30Z"
+  },
+  {
+    "id": "dep_000018",
+    "user_id": "usr_000421",
+    "method_id": "crypto_usdt",
+    "amount_usd": 163.78,
+    "status": "completed",
+    "created_at": "2026-05-11T10:57:19Z",
+    "completed_at": "2026-05-13T21:50:46Z"
+  },
+  {
+    "id": "dep_000019",
+    "user_id": "usr_000078",
+    "method_id": "wire_us",
+    "amount_usd": 3480.75,
+    "status": "completed",
+    "created_at": "2026-05-18T02:42:28Z",
+    "completed_at": "2026-05-18T18:52:23Z"
+  },
+  {
+    "id": "dep_000020",
+    "user_id": "usr_000234",
+    "method_id": "wise",
+    "amount_usd": 244.82,
+    "status": "completed",
+    "created_at": "2026-05-18T04:41:15Z",
+    "completed_at": "2026-05-19T15:07:51Z"
+  },
+  {
+    "id": "dep_000021",
+    "user_id": "usr_000418",
+    "method_id": "wire_us",
+    "amount_usd": 5930.07,
+    "status": "completed",
+    "created_at": "2026-05-12T23:25:54Z",
+    "completed_at": "2026-05-14T03:19:12Z"
+  },
+  {
+    "id": "dep_000022",
+    "user_id": "usr_000023",
+    "method_id": "crypto_usdc",
+    "amount_usd": 252.32,
+    "status": "completed",
+    "created_at": "2026-05-16T19:12:02Z",
+    "completed_at": "2026-05-17T20:19:23Z"
+  },
+  {
+    "id": "dep_000023",
+    "user_id": "usr_000036",
+    "method_id": "crypto_usdt",
+    "amount_usd": 1144.18,
+    "status": "completed",
+    "created_at": "2026-05-16T16:29:47Z",
+    "completed_at": "2026-05-17T09:44:20Z"
+  },
+  {
+    "id": "dep_000024",
+    "user_id": "usr_000303",
+    "method_id": "payoneer",
+    "amount_usd": 294.7,
+    "status": "completed",
+    "created_at": "2026-05-15T23:11:44Z",
+    "completed_at": "2026-05-16T05:31:41Z"
+  },
+  {
+    "id": "dep_000025",
+    "user_id": "usr_000299",
+    "method_id": "crypto_usdt",
+    "amount_usd": 254.17,
+    "status": "completed",
+    "created_at": "2026-05-15T18:30:48Z",
+    "completed_at": "2026-05-16T07:32:50Z"
+  },
+  {
+    "id": "dep_000026",
+    "user_id": "usr_000167",
+    "method_id": "wire_us",
+    "amount_usd": 161.08,
+    "status": "completed",
+    "created_at": "2026-05-22T14:18:00Z",
+    "completed_at": "2026-05-23T06:23:34Z"
+  },
+  {
+    "id": "dep_000027",
+    "user_id": "usr_000181",
+    "method_id": "paypal",
+    "amount_usd": 130.3,
+    "status": "completed",
+    "created_at": "2026-05-19T21:13:09Z",
+    "completed_at": "2026-05-21T18:01:56Z"
+  },
+  {
+    "id": "dep_000028",
+    "user_id": "usr_000155",
+    "method_id": "wire_us",
+    "amount_usd": 2683.44,
+    "status": "completed",
+    "created_at": "2026-05-16T04:07:36Z",
+    "completed_at": "2026-05-18T01:22:32Z"
+  },
+  {
+    "id": "dep_000029",
+    "user_id": "usr_000489",
+    "method_id": "sepa_eu",
+    "amount_usd": 74.31,
+    "status": "completed",
+    "created_at": "2026-05-17T00:32:06Z",
+    "completed_at": "2026-05-18T01:13:23Z"
+  },
+  {
+    "id": "dep_000030",
+    "user_id": "usr_000361",
+    "method_id": "paypal",
+    "amount_usd": 168.41,
+    "status": "completed",
+    "created_at": "2026-05-16T23:38:07Z",
+    "completed_at": "2026-05-18T19:12:00Z"
+  },
+  {
+    "id": "dep_000031",
+    "user_id": "usr_000278",
+    "method_id": "payoneer",
+    "amount_usd": 755.7,
+    "status": "completed",
+    "created_at": "2026-05-22T23:59:37Z",
+    "completed_at": "2026-05-25T01:56:27Z"
+  },
+  {
+    "id": "dep_000032",
+    "user_id": "usr_000221",
+    "method_id": "crypto_usdc",
+    "amount_usd": 183.36,
+    "status": "completed",
+    "created_at": "2026-05-22T07:53:34Z",
+    "completed_at": "2026-05-22T20:45:28Z"
+  },
+  {
+    "id": "dep_000033",
+    "user_id": "usr_000206",
+    "method_id": "payoneer",
+    "amount_usd": 295.41,
+    "status": "completed",
+    "created_at": "2026-05-20T12:20:42Z",
+    "completed_at": "2026-05-21T03:34:12Z"
+  },
+  {
+    "id": "dep_000034",
+    "user_id": "usr_000207",
+    "method_id": "crypto_usdt",
+    "amount_usd": 110.44,
+    "status": "completed",
+    "created_at": "2026-05-19T08:09:18Z",
+    "completed_at": "2026-05-20T12:00:54Z"
+  },
+  {
+    "id": "dep_000035",
+    "user_id": "usr_000092",
+    "method_id": "crypto_usdc",
+    "amount_usd": 220.11,
+    "status": "completed",
+    "created_at": "2026-05-20T05:15:51Z",
+    "completed_at": "2026-05-21T17:12:15Z"
+  },
+  {
+    "id": "dep_000036",
+    "user_id": "usr_000456",
+    "method_id": "local_ar",
+    "amount_usd": 557.5,
+    "status": "completed",
+    "created_at": "2026-05-19T20:30:50Z",
+    "completed_at": "2026-05-22T01:14:25Z"
+  },
+  {
+    "id": "dep_000037",
+    "user_id": "usr_000345",
+    "method_id": "payoneer",
+    "amount_usd": 946.87,
+    "status": "completed",
+    "created_at": "2026-05-22T11:46:43Z",
+    "completed_at": "2026-05-24T02:20:14Z"
+  },
+  {
+    "id": "dep_000038",
+    "user_id": "usr_000246",
+    "method_id": "payoneer",
+    "amount_usd": 872.93,
+    "status": "completed",
+    "created_at": "2026-05-25T11:54:20Z",
+    "completed_at": "2026-05-25T21:44:34Z"
+  },
+  {
+    "id": "dep_000039",
+    "user_id": "usr_000558",
+    "method_id": "crypto_usdt",
+    "amount_usd": 57.12,
+    "status": "completed",
+    "created_at": "2026-05-25T09:41:55Z",
+    "completed_at": "2026-05-27T21:21:17Z"
+  },
+  {
+    "id": "dep_000040",
+    "user_id": "usr_000184",
+    "method_id": "paypal",
+    "amount_usd": 2015.2,
+    "status": "completed",
+    "created_at": "2026-05-27T17:46:16Z",
+    "completed_at": "2026-05-29T10:46:07Z"
+  },
+  {
+    "id": "dep_000041",
+    "user_id": "usr_000136",
+    "method_id": "crypto_usdc",
+    "amount_usd": 885.2,
+    "status": "completed",
+    "created_at": "2026-05-23T19:01:08Z",
+    "completed_at": "2026-05-24T00:58:03Z"
+  },
+  {
+    "id": "dep_000042",
+    "user_id": "usr_000197",
+    "method_id": "crypto_usdc",
+    "amount_usd": 879.26,
+    "status": "completed",
+    "created_at": "2026-05-26T15:59:15Z",
+    "completed_at": "2026-05-27T22:28:21Z"
+  },
+  {
+    "id": "dep_000043",
+    "user_id": "usr_000134",
+    "method_id": "wise",
+    "amount_usd": 782.14,
+    "status": "completed",
+    "created_at": "2026-05-23T21:31:59Z",
+    "completed_at": "2026-05-24T11:41:28Z"
+  },
+  {
+    "id": "dep_000044",
+    "user_id": "usr_000052",
+    "method_id": "crypto_usdc",
+    "amount_usd": 927.36,
+    "status": "completed",
+    "created_at": "2026-05-25T21:19:17Z",
+    "completed_at": "2026-05-28T03:49:37Z"
+  },
+  {
+    "id": "dep_000045",
+    "user_id": "usr_000590",
+    "method_id": "paypal",
+    "amount_usd": 1322.04,
+    "status": "completed",
+    "created_at": "2026-05-24T04:54:36Z",
+    "completed_at": "2026-05-25T09:01:21Z"
+  },
+  {
+    "id": "dep_000046",
+    "user_id": "usr_000319",
+    "method_id": "paypal",
+    "amount_usd": 272.08,
+    "status": "completed",
+    "created_at": "2026-05-30T00:57:32Z",
+    "completed_at": "2026-05-31T12:22:45Z"
+  },
+  {
+    "id": "dep_000047",
+    "user_id": "usr_000208",
+    "method_id": "crypto_usdc",
+    "amount_usd": 133.01,
+    "status": "completed",
+    "created_at": "2026-05-24T00:43:18Z",
+    "completed_at": "2026-05-25T06:00:13Z"
+  },
+  {
+    "id": "dep_000048",
+    "user_id": "usr_000310",
+    "method_id": "paypal",
+    "amount_usd": 204.18,
+    "status": "completed",
+    "created_at": "2026-05-28T07:49:12Z",
+    "completed_at": "2026-05-28T18:09:33Z"
+  },
+  {
+    "id": "dep_000049",
+    "user_id": "usr_000251",
+    "method_id": "crypto_usdt",
+    "amount_usd": 338.09,
+    "status": "completed",
+    "created_at": "2026-05-29T15:28:52Z",
+    "completed_at": "2026-05-30T23:36:51Z"
+  },
+  {
+    "id": "dep_000050",
+    "user_id": "usr_000097",
+    "method_id": "wire_us",
+    "amount_usd": 244.63,
+    "status": "completed",
+    "created_at": "2026-06-03T01:59:58Z",
+    "completed_at": "2026-06-05T07:01:30Z"
+  },
+  {
+    "id": "dep_000051",
+    "user_id": "usr_000094",
+    "method_id": "paypal",
+    "amount_usd": 410.42,
+    "status": "completed",
+    "created_at": "2026-05-30T10:35:34Z",
+    "completed_at": "2026-06-01T13:49:23Z"
+  },
+  {
+    "id": "dep_000052",
+    "user_id": "usr_000566",
+    "method_id": "paypal",
+    "amount_usd": 2958.07,
+    "status": "completed",
+    "created_at": "2026-05-31T15:55:56Z",
+    "completed_at": "2026-06-01T11:55:15Z"
+  },
+  {
+    "id": "dep_000053",
+    "user_id": "usr_000570",
+    "method_id": "crypto_usdc",
+    "amount_usd": 153.12,
+    "status": "completed",
+    "created_at": "2026-05-30T04:54:19Z",
+    "completed_at": "2026-05-30T13:30:34Z"
+  },
+  {
+    "id": "dep_000054",
+    "user_id": "usr_000137",
+    "method_id": "wise",
+    "amount_usd": 455.12,
+    "status": "completed",
+    "created_at": "2026-05-29T02:42:30Z",
+    "completed_at": "2026-05-31T08:01:07Z"
+  },
+  {
+    "id": "dep_000055",
+    "user_id": "usr_000285",
+    "method_id": "wire_us",
+    "amount_usd": 946.78,
+    "status": "completed",
+    "created_at": "2026-06-06T08:48:20Z",
+    "completed_at": "2026-06-08T09:21:36Z"
+  },
+  {
+    "id": "dep_000056",
+    "user_id": "usr_000217",
+    "method_id": "crypto_usdt",
+    "amount_usd": 1052.21,
+    "status": "completed",
+    "created_at": "2026-06-06T16:16:07Z",
+    "completed_at": "2026-06-09T03:27:38Z"
+  },
+  {
+    "id": "dep_000057",
+    "user_id": "usr_000315",
+    "method_id": "crypto_usdt",
+    "amount_usd": 120.4,
+    "status": "completed",
+    "created_at": "2026-06-06T12:12:12Z",
+    "completed_at": "2026-06-08T13:07:09Z"
+  },
+  {
+    "id": "dep_000058",
+    "user_id": "usr_000384",
+    "method_id": "local_mx",
+    "amount_usd": 219.42,
+    "status": "completed",
+    "created_at": "2026-06-06T11:55:51Z",
+    "completed_at": "2026-06-06T15:51:35Z"
+  },
+  {
+    "id": "dep_000059",
+    "user_id": "usr_000111",
+    "method_id": "local_ar",
+    "amount_usd": 778.29,
+    "status": "completed",
+    "created_at": "2026-06-06T03:33:17Z",
+    "completed_at": "2026-06-08T11:32:05Z"
+  },
+  {
+    "id": "dep_000060",
+    "user_id": "usr_000429",
+    "method_id": "payoneer",
+    "amount_usd": 206.05,
+    "status": "completed",
+    "created_at": "2026-05-31T11:33:57Z",
+    "completed_at": "2026-05-31T23:52:05Z"
+  },
+  {
+    "id": "dep_000061",
+    "user_id": "usr_000295",
+    "method_id": "payoneer",
+    "amount_usd": 4370.27,
+    "status": "completed",
+    "created_at": "2026-06-04T21:57:57Z",
+    "completed_at": "2026-06-05T18:48:24Z"
+  },
+  {
+    "id": "dep_000062",
+    "user_id": "usr_000522",
+    "method_id": "crypto_usdt",
+    "amount_usd": 231.21,
+    "status": "completed",
+    "created_at": "2026-06-06T22:51:56Z",
+    "completed_at": "2026-06-07T14:39:39Z"
+  },
+  {
+    "id": "dep_000063",
+    "user_id": "usr_000266",
+    "method_id": "crypto_usdt",
+    "amount_usd": 1159.17,
+    "status": "completed",
+    "created_at": "2026-06-06T16:53:11Z",
+    "completed_at": "2026-06-06T19:55:12Z"
+  },
+  {
+    "id": "dep_000064",
+    "user_id": "usr_000304",
+    "method_id": "wire_us",
+    "amount_usd": 578.32,
+    "status": "completed",
+    "created_at": "2026-06-01T09:39:33Z",
+    "completed_at": "2026-06-02T04:09:33Z"
+  },
+  {
+    "id": "dep_000065",
+    "user_id": "usr_000381",
+    "method_id": "payoneer",
+    "amount_usd": 256.47,
+    "status": "completed",
+    "created_at": "2026-06-04T18:54:54Z",
+    "completed_at": "2026-06-05T23:59:36Z"
+  },
+  {
+    "id": "dep_000066",
+    "user_id": "usr_000313",
+    "method_id": "wise",
+    "amount_usd": 270.2,
+    "status": "completed",
+    "created_at": "2026-06-09T04:59:30Z",
+    "completed_at": "2026-06-10T13:33:39Z"
+  },
+  {
+    "id": "dep_000067",
+    "user_id": "usr_000116",
+    "method_id": "crypto_usdc",
+    "amount_usd": 350.4,
+    "status": "completed",
+    "created_at": "2026-06-03T04:19:27Z",
+    "completed_at": "2026-06-04T05:00:24Z"
+  },
+  {
+    "id": "dep_000068",
+    "user_id": "usr_000580",
+    "method_id": "local_ar",
+    "amount_usd": 167.3,
+    "status": "completed",
+    "created_at": "2026-06-04T08:28:55Z",
+    "completed_at": "2026-06-05T18:33:13Z"
+  },
+  {
+    "id": "dep_000069",
+    "user_id": "usr_000533",
+    "method_id": "crypto_usdt",
+    "amount_usd": 171.79,
+    "status": "completed",
+    "created_at": "2026-06-02T13:51:26Z",
+    "completed_at": "2026-06-04T07:10:27Z"
+  },
+  {
+    "id": "dep_000070",
+    "user_id": "usr_000520",
+    "method_id": "payoneer",
+    "amount_usd": 69.94,
+    "status": "completed",
+    "created_at": "2026-06-09T17:02:03Z",
+    "completed_at": "2026-06-12T03:11:45Z"
+  },
+  {
+    "id": "dep_000071",
+    "user_id": "usr_000496",
+    "method_id": "paypal",
+    "amount_usd": 255.03,
+    "status": "completed",
+    "created_at": "2026-06-05T20:08:08Z",
+    "completed_at": "2026-06-07T05:14:18Z"
+  },
+  {
+    "id": "dep_000072",
+    "user_id": "usr_000445",
+    "method_id": "payoneer",
+    "amount_usd": 1168.43,
+    "status": "completed",
+    "created_at": "2026-06-08T11:52:59Z",
+    "completed_at": "2026-06-10T21:55:40Z"
+  },
+  {
+    "id": "dep_000073",
+    "user_id": "usr_000075",
+    "method_id": "wire_us",
+    "amount_usd": 629.4,
+    "status": "completed",
+    "created_at": "2026-06-09T00:30:27Z",
+    "completed_at": "2026-06-10T21:30:43Z"
+  },
+  {
+    "id": "dep_000074",
+    "user_id": "usr_000317",
+    "method_id": "wire_us",
+    "amount_usd": 2675.11,
+    "status": "completed",
+    "created_at": "2026-06-07T02:05:36Z",
+    "completed_at": "2026-06-07T13:38:33Z"
+  },
+  {
+    "id": "dep_000075",
+    "user_id": "usr_000046",
+    "method_id": "payoneer",
+    "amount_usd": 233.93,
+    "status": "completed",
+    "created_at": "2026-06-11T04:56:57Z",
+    "completed_at": "2026-06-11T10:07:32Z"
+  },
+  {
+    "id": "dep_000076",
+    "user_id": "usr_000202",
+    "method_id": "wise",
+    "amount_usd": 127.91,
+    "status": "completed",
+    "created_at": "2026-06-04T04:16:09Z",
+    "completed_at": "2026-06-06T07:53:00Z"
+  },
+  {
+    "id": "dep_000077",
+    "user_id": "usr_000121",
+    "method_id": "wire_us",
+    "amount_usd": 292.43,
+    "status": "completed",
+    "created_at": "2026-06-09T10:02:19Z",
+    "completed_at": "2026-06-11T00:46:35Z"
+  },
+  {
+    "id": "dep_000078",
+    "user_id": "usr_000128",
+    "method_id": "local_ar",
+    "amount_usd": 3794.93,
+    "status": "completed",
+    "created_at": "2026-06-09T12:09:30Z",
+    "completed_at": "2026-06-11T22:35:16Z"
+  },
+  {
+    "id": "dep_000079",
+    "user_id": "usr_000257",
+    "method_id": "wire_us",
+    "amount_usd": 65.39,
+    "status": "completed",
+    "created_at": "2026-06-07T13:58:48Z",
+    "completed_at": "2026-06-09T21:11:03Z"
+  },
+  {
+    "id": "dep_000080",
+    "user_id": "usr_000352",
+    "method_id": "payoneer",
+    "amount_usd": 238.48,
+    "status": "completed",
+    "created_at": "2026-06-14T18:56:07Z",
+    "completed_at": "2026-06-15T14:33:16Z"
+  },
+  {
+    "id": "dep_000081",
+    "user_id": "usr_000262",
+    "method_id": "wise",
+    "amount_usd": 713.25,
+    "status": "completed",
+    "created_at": "2026-06-12T22:22:46Z",
+    "completed_at": "2026-06-13T19:14:45Z"
+  },
+  {
+    "id": "dep_000082",
+    "user_id": "usr_000032",
+    "method_id": "wise",
+    "amount_usd": 213.4,
+    "status": "completed",
+    "created_at": "2026-06-08T03:33:17Z",
+    "completed_at": "2026-06-08T17:48:37Z"
+  },
+  {
+    "id": "dep_000083",
+    "user_id": "usr_000189",
+    "method_id": "crypto_usdc",
+    "amount_usd": 785.21,
+    "status": "completed",
+    "created_at": "2026-06-09T06:41:58Z",
+    "completed_at": "2026-06-09T12:49:17Z"
+  },
+  {
+    "id": "dep_000084",
+    "user_id": "usr_000471",
+    "method_id": "crypto_usdc",
+    "amount_usd": 691.32,
+    "status": "completed",
+    "created_at": "2026-06-08T01:26:16Z",
+    "completed_at": "2026-06-10T00:58:03Z"
+  },
+  {
+    "id": "dep_000085",
+    "user_id": "usr_000594",
+    "method_id": "wise",
+    "amount_usd": 239.09,
+    "status": "completed",
+    "created_at": "2026-06-14T04:54:11Z",
+    "completed_at": "2026-06-14T23:00:06Z"
+  },
+  {
+    "id": "dep_000086",
+    "user_id": "usr_000407",
+    "method_id": "wire_us",
+    "amount_usd": 363.69,
+    "status": "completed",
+    "created_at": "2026-06-12T13:05:07Z",
+    "completed_at": "2026-06-13T10:18:58Z"
+  },
+  {
+    "id": "dep_000087",
+    "user_id": "usr_000586",
+    "method_id": "local_ar",
+    "amount_usd": 50.73,
+    "status": "completed",
+    "created_at": "2026-06-16T03:47:12Z",
+    "completed_at": "2026-06-17T05:28:15Z"
+  },
+  {
+    "id": "dep_000088",
+    "user_id": "usr_000363",
+    "method_id": "payoneer",
+    "amount_usd": 281.03,
+    "status": "completed",
+    "created_at": "2026-06-12T06:08:20Z",
+    "completed_at": "2026-06-14T11:40:13Z"
+  },
+  {
+    "id": "dep_000089",
+    "user_id": "usr_000085",
+    "method_id": "wise",
+    "amount_usd": 178.78,
+    "status": "completed",
+    "created_at": "2026-06-10T01:42:52Z",
+    "completed_at": "2026-06-11T04:51:56Z"
+  },
+  {
+    "id": "dep_000090",
+    "user_id": "usr_000280",
+    "method_id": "crypto_usdc",
+    "amount_usd": 243.27,
+    "status": "completed",
+    "created_at": "2026-06-10T08:59:51Z",
+    "completed_at": "2026-06-10T15:04:59Z"
+  },
+  {
+    "id": "dep_000091",
+    "user_id": "usr_000276",
+    "method_id": "paypal",
+    "amount_usd": 192.92,
+    "status": "completed",
+    "created_at": "2026-06-17T03:23:52Z",
+    "completed_at": "2026-06-17T15:56:17Z"
+  },
+  {
+    "id": "dep_000092",
+    "user_id": "usr_000333",
+    "method_id": "paypal",
+    "amount_usd": 58.14,
+    "status": "completed",
+    "created_at": "2026-06-13T12:26:13Z",
+    "completed_at": "2026-06-15T10:20:37Z"
+  },
+  {
+    "id": "dep_000093",
+    "user_id": "usr_000309",
+    "method_id": "paypal",
+    "amount_usd": 483.59,
+    "status": "completed",
+    "created_at": "2026-06-10T19:17:12Z",
+    "completed_at": "2026-06-12T08:53:55Z"
+  },
+  {
+    "id": "dep_000094",
+    "user_id": "usr_000031",
+    "method_id": "payoneer",
+    "amount_usd": 409.46,
+    "status": "completed",
+    "created_at": "2026-06-12T11:57:48Z",
+    "completed_at": "2026-06-13T12:29:34Z"
+  },
+  {
+    "id": "dep_000095",
+    "user_id": "usr_000091",
+    "method_id": "local_ar",
+    "amount_usd": 273.21,
+    "status": "completed",
+    "created_at": "2026-06-13T10:04:48Z",
+    "completed_at": "2026-06-13T13:52:03Z"
+  },
+  {
+    "id": "dep_000096",
+    "user_id": "usr_000022",
+    "method_id": "crypto_usdc",
+    "amount_usd": 4352.72,
+    "status": "completed",
+    "created_at": "2026-06-14T03:01:12Z",
+    "completed_at": "2026-06-15T17:17:12Z"
+  },
+  {
+    "id": "dep_000097",
+    "user_id": "usr_000259",
+    "method_id": "wise",
+    "amount_usd": 170.38,
+    "status": "completed",
+    "created_at": "2026-06-18T01:33:27Z",
+    "completed_at": "2026-06-19T21:30:48Z"
+  },
+  {
+    "id": "dep_000098",
+    "user_id": "usr_000397",
+    "method_id": "wire_us",
+    "amount_usd": 3985.46,
+    "status": "completed",
+    "created_at": "2026-06-20T23:01:09Z",
+    "completed_at": "2026-06-23T06:16:29Z"
+  },
+  {
+    "id": "dep_000099",
+    "user_id": "usr_000095",
+    "method_id": "crypto_usdt",
+    "amount_usd": 150.44,
+    "status": "completed",
+    "created_at": "2026-06-13T13:12:30Z",
+    "completed_at": "2026-06-14T20:32:31Z"
+  },
+  {
+    "id": "dep_000100",
+    "user_id": "usr_000249",
+    "method_id": "local_co",
+    "amount_usd": 1041.29,
+    "status": "completed",
+    "created_at": "2026-06-23T07:45:10Z",
+    "completed_at": "2026-06-23T18:31:30Z"
+  },
+  {
+    "id": "dep_000101",
+    "user_id": "usr_000417",
+    "method_id": "paypal",
+    "amount_usd": 98.97,
+    "status": "completed",
+    "created_at": "2026-06-19T17:45:42Z",
+    "completed_at": "2026-06-21T01:21:35Z"
+  },
+  {
+    "id": "dep_000102",
+    "user_id": "usr_000261",
+    "method_id": "crypto_usdc",
+    "amount_usd": 4178.37,
+    "status": "completed",
+    "created_at": "2026-06-15T00:40:32Z",
+    "completed_at": "2026-06-16T22:05:17Z"
+  },
+  {
+    "id": "dep_000103",
+    "user_id": "usr_000120",
+    "method_id": "wire_us",
+    "amount_usd": 3433.17,
+    "status": "completed",
+    "created_at": "2026-06-17T08:12:42Z",
+    "completed_at": "2026-06-18T03:32:54Z"
+  },
+  {
+    "id": "dep_000104",
+    "user_id": "usr_000316",
+    "method_id": "wise",
+    "amount_usd": 1100.21,
+    "status": "completed",
+    "created_at": "2026-06-15T22:06:54Z",
+    "completed_at": "2026-06-17T10:25:07Z"
+  },
+  {
+    "id": "dep_000105",
+    "user_id": "usr_000481",
+    "method_id": "wire_us",
+    "amount_usd": 2364.26,
+    "status": "completed",
+    "created_at": "2026-06-21T10:13:50Z",
+    "completed_at": "2026-06-23T11:28:59Z"
+  },
+  {
+    "id": "dep_000106",
+    "user_id": "usr_000265",
+    "method_id": "crypto_usdt",
+    "amount_usd": 284.35,
+    "status": "completed",
+    "created_at": "2026-06-16T23:59:43Z",
+    "completed_at": "2026-06-17T19:39:02Z"
+  },
+  {
+    "id": "dep_000107",
+    "user_id": "usr_000372",
+    "method_id": "wire_us",
+    "amount_usd": 263.93,
+    "status": "completed",
+    "created_at": "2026-06-21T01:49:22Z",
+    "completed_at": "2026-06-23T03:42:17Z"
+  },
+  {
+    "id": "dep_000108",
+    "user_id": "usr_000073",
+    "method_id": "wire_us",
+    "amount_usd": 181.6,
+    "status": "completed",
+    "created_at": "2026-06-24T09:38:32Z",
+    "completed_at": "2026-06-26T04:29:22Z"
+  },
+  {
+    "id": "dep_000109",
+    "user_id": "usr_000096",
+    "method_id": "wire_us",
+    "amount_usd": 330.51,
+    "status": "completed",
+    "created_at": "2026-06-17T20:45:54Z",
+    "completed_at": "2026-06-18T06:41:34Z"
+  },
+  {
+    "id": "dep_000110",
+    "user_id": "usr_000587",
+    "method_id": "wire_us",
+    "amount_usd": 293.38,
+    "status": "completed",
+    "created_at": "2026-06-23T12:57:28Z",
+    "completed_at": "2026-06-25T05:44:13Z"
+  },
+  {
+    "id": "dep_000111",
+    "user_id": "usr_000283",
+    "method_id": "wise",
+    "amount_usd": 855.24,
+    "status": "completed",
+    "created_at": "2026-06-24T06:21:31Z",
+    "completed_at": "2026-06-24T16:04:18Z"
+  },
+  {
+    "id": "dep_000112",
+    "user_id": "usr_000571",
+    "method_id": "payoneer",
+    "amount_usd": 410.74,
+    "status": "completed",
+    "created_at": "2026-06-24T17:55:25Z",
+    "completed_at": "2026-06-25T08:17:27Z"
+  },
+  {
+    "id": "dep_000113",
+    "user_id": "usr_000011",
+    "method_id": "crypto_usdt",
+    "amount_usd": 56.49,
+    "status": "completed",
+    "created_at": "2026-06-22T21:04:37Z",
+    "completed_at": "2026-06-24T04:51:27Z"
+  },
+  {
+    "id": "dep_000114",
+    "user_id": "usr_000400",
+    "method_id": "crypto_usdc",
+    "amount_usd": 5377.26,
+    "status": "completed",
+    "created_at": "2026-06-20T18:00:49Z",
+    "completed_at": "2026-06-21T08:54:55Z"
+  },
+  {
+    "id": "dep_000115",
+    "user_id": "usr_000508",
+    "method_id": "crypto_usdt",
+    "amount_usd": 892.73,
+    "status": "completed",
+    "created_at": "2026-06-25T15:30:59Z",
+    "completed_at": "2026-06-28T01:15:11Z"
+  },
+  {
+    "id": "dep_000116",
+    "user_id": "usr_000552",
+    "method_id": "payoneer",
+    "amount_usd": 743.14,
+    "status": "completed",
+    "created_at": "2026-06-20T22:34:30Z",
+    "completed_at": "2026-06-22T04:37:32Z"
+  },
+  {
+    "id": "dep_000117",
+    "user_id": "usr_000328",
+    "method_id": "crypto_usdt",
+    "amount_usd": 1056.6,
+    "status": "completed",
+    "created_at": "2026-06-22T13:36:48Z",
+    "completed_at": "2026-06-24T04:34:03Z"
+  },
+  {
+    "id": "dep_000118",
+    "user_id": "usr_000458",
+    "method_id": "local_ar",
+    "amount_usd": 771.62,
+    "status": "completed",
+    "created_at": "2026-06-26T19:33:04Z",
+    "completed_at": "2026-06-26T23:31:27Z"
+  },
+  {
+    "id": "dep_000119",
+    "user_id": "usr_000404",
+    "method_id": "local_mx",
+    "amount_usd": 438.09,
+    "status": "completed",
+    "created_at": "2026-06-26T15:01:04Z",
+    "completed_at": "2026-06-27T07:04:53Z"
+  },
+  {
+    "id": "dep_000120",
+    "user_id": "usr_000432",
+    "method_id": "wire_us",
+    "amount_usd": 1973.2,
+    "status": "completed",
+    "created_at": "2026-06-24T16:33:31Z",
+    "completed_at": "2026-06-25T22:56:02Z"
+  },
+  {
+    "id": "dep_000121",
+    "user_id": "usr_000359",
+    "method_id": "wire_us",
+    "amount_usd": 199.61,
+    "status": "completed",
+    "created_at": "2026-06-25T05:30:42Z",
+    "completed_at": "2026-06-26T07:44:37Z"
+  },
+  {
+    "id": "dep_000122",
+    "user_id": "usr_000180",
+    "method_id": "local_ar",
+    "amount_usd": 169.16,
+    "status": "completed",
+    "created_at": "2026-06-24T23:05:23Z",
+    "completed_at": "2026-06-27T00:23:26Z"
+  },
+  {
+    "id": "dep_000123",
+    "user_id": "usr_000327",
+    "method_id": "paypal",
+    "amount_usd": 419.21,
+    "status": "completed",
+    "created_at": "2026-06-23T14:21:11Z",
+    "completed_at": "2026-06-25T16:59:08Z"
+  },
+  {
+    "id": "dep_000124",
+    "user_id": "usr_000093",
+    "method_id": "wise",
+    "amount_usd": 3236.94,
+    "status": "completed",
+    "created_at": "2026-06-25T18:48:49Z",
+    "completed_at": "2026-06-27T01:18:34Z"
+  },
+  {
+    "id": "dep_000125",
+    "user_id": "usr_000492",
+    "method_id": "crypto_usdc",
+    "amount_usd": 219.83,
+    "status": "completed",
+    "created_at": "2026-06-30T22:08:55Z",
+    "completed_at": "2026-07-03T09:12:33Z"
+  },
+  {
+    "id": "dep_000126",
+    "user_id": "usr_000367",
+    "method_id": "payoneer",
+    "amount_usd": 803.9,
+    "status": "completed",
+    "created_at": "2026-06-30T01:55:53Z",
+    "completed_at": "2026-07-01T09:10:56Z"
+  },
+  {
+    "id": "dep_000127",
+    "user_id": "usr_000479",
+    "method_id": "wise",
+    "amount_usd": 124.38,
+    "status": "completed",
+    "created_at": "2026-06-28T19:18:40Z",
+    "completed_at": "2026-07-01T01:57:48Z"
+  },
+  {
+    "id": "dep_000128",
+    "user_id": "usr_000545",
+    "method_id": "crypto_usdt",
+    "amount_usd": 4817.9,
+    "status": "completed",
+    "created_at": "2026-06-28T17:16:23Z",
+    "completed_at": "2026-06-29T04:10:02Z"
+  },
+  {
+    "id": "dep_000129",
+    "user_id": "usr_000196",
+    "method_id": "wire_us",
+    "amount_usd": 177.1,
+    "status": "completed",
+    "created_at": "2026-07-03T08:35:10Z",
+    "completed_at": "2026-07-05T01:02:03Z"
+  },
+  {
+    "id": "dep_000130",
+    "user_id": "usr_000463",
+    "method_id": "crypto_usdt",
+    "amount_usd": 766.11,
+    "status": "completed",
+    "created_at": "2026-06-27T06:29:23Z",
+    "completed_at": "2026-06-28T22:13:19Z"
+  },
+  {
+    "id": "dep_000131",
+    "user_id": "usr_000107",
+    "method_id": "crypto_usdt",
+    "amount_usd": 150.15,
+    "status": "completed",
+    "created_at": "2026-06-27T00:32:30Z",
+    "completed_at": "2026-06-29T07:00:00Z"
+  },
+  {
+    "id": "dep_000132",
+    "user_id": "usr_000151",
+    "method_id": "crypto_usdc",
+    "amount_usd": 4147.7,
+    "status": "completed",
+    "created_at": "2026-07-02T22:35:29Z",
+    "completed_at": "2026-07-04T06:33:49Z"
+  },
+  {
+    "id": "dep_000133",
+    "user_id": "usr_000311",
+    "method_id": "paypal",
+    "amount_usd": 794.41,
+    "status": "completed",
+    "created_at": "2026-07-01T05:32:39Z",
+    "completed_at": "2026-07-03T11:49:33Z"
+  },
+  {
+    "id": "dep_000134",
+    "user_id": "usr_000513",
+    "method_id": "crypto_usdc",
+    "amount_usd": 788.0,
+    "status": "completed",
+    "created_at": "2026-06-28T12:38:59Z",
+    "completed_at": "2026-06-28T21:47:13Z"
+  },
+  {
+    "id": "dep_000135",
+    "user_id": "usr_000117",
+    "method_id": "payoneer",
+    "amount_usd": 1096.68,
+    "status": "completed",
+    "created_at": "2026-07-06T01:02:30Z",
+    "completed_at": "2026-07-06T05:58:59Z"
+  },
+  {
+    "id": "dep_000136",
+    "user_id": "usr_000290",
+    "method_id": "crypto_usdt",
+    "amount_usd": 77.59,
+    "status": "completed",
+    "created_at": "2026-06-30T04:23:24Z",
+    "completed_at": "2026-07-01T11:38:05Z"
+  },
+  {
+    "id": "dep_000137",
+    "user_id": "usr_000144",
+    "method_id": "wire_us",
+    "amount_usd": 198.25,
+    "status": "completed",
+    "created_at": "2026-07-03T21:50:35Z",
+    "completed_at": "2026-07-06T00:43:24Z"
+  },
+  {
+    "id": "dep_000138",
+    "user_id": "usr_000574",
+    "method_id": "crypto_usdt",
+    "amount_usd": 995.01,
+    "status": "completed",
+    "created_at": "2026-07-03T08:39:38Z",
+    "completed_at": "2026-07-04T13:58:00Z"
+  },
+  {
+    "id": "dep_000139",
+    "user_id": "usr_000231",
+    "method_id": "crypto_usdc",
+    "amount_usd": 1540.74,
+    "status": "completed",
+    "created_at": "2026-07-04T16:12:38Z",
+    "completed_at": "2026-07-04T18:58:33Z"
+  },
+  {
+    "id": "dep_000140",
+    "user_id": "usr_000584",
+    "method_id": "wire_us",
+    "amount_usd": 614.05,
+    "status": "completed",
+    "created_at": "2026-07-02T09:15:45Z",
+    "completed_at": "2026-07-04T13:36:48Z"
+  },
+  {
+    "id": "dep_000141",
+    "user_id": "usr_000203",
+    "method_id": "crypto_usdt",
+    "amount_usd": 180.26,
+    "status": "completed",
+    "created_at": "2026-07-08T03:45:23Z",
+    "completed_at": "2026-07-09T04:25:21Z"
+  },
+  {
+    "id": "dep_000142",
+    "user_id": "usr_000411",
+    "method_id": "local_ar",
+    "amount_usd": 221.47,
+    "status": "completed",
+    "created_at": "2026-07-04T00:16:14Z",
+    "completed_at": "2026-07-05T17:32:03Z"
+  },
+  {
+    "id": "dep_000143",
+    "user_id": "usr_000160",
+    "method_id": "wire_us",
+    "amount_usd": 648.66,
+    "status": "completed",
+    "created_at": "2026-07-06T13:29:10Z",
+    "completed_at": "2026-07-07T14:59:03Z"
+  },
+  {
+    "id": "dep_000144",
+    "user_id": "usr_000271",
+    "method_id": "wise",
+    "amount_usd": 1086.43,
+    "status": "completed",
+    "created_at": "2026-07-05T03:25:08Z",
+    "completed_at": "2026-07-06T06:42:32Z"
+  },
+  {
+    "id": "dep_000145",
+    "user_id": "usr_000330",
+    "method_id": "wise",
+    "amount_usd": 904.77,
+    "status": "completed",
+    "created_at": "2026-07-03T23:25:59Z",
+    "completed_at": "2026-07-04T22:06:55Z"
+  },
+  {
+    "id": "dep_000146",
+    "user_id": "usr_000468",
+    "method_id": "wise",
+    "amount_usd": 856.48,
+    "status": "completed",
+    "created_at": "2026-07-07T03:49:21Z",
+    "completed_at": "2026-07-09T02:52:58Z"
+  },
+  {
+    "id": "dep_000147",
+    "user_id": "usr_000021",
+    "method_id": "crypto_usdt",
+    "amount_usd": 1333.15,
+    "status": "completed",
+    "created_at": "2026-07-13T14:46:23Z",
+    "completed_at": "2026-07-15T04:30:29Z"
+  },
+  {
+    "id": "dep_000148",
+    "user_id": "usr_000122",
+    "method_id": "wire_us",
+    "amount_usd": 267.14,
+    "status": "completed",
+    "created_at": "2026-07-06T06:51:25Z",
+    "completed_at": "2026-07-06T23:05:16Z"
+  },
+  {
+    "id": "dep_000149",
+    "user_id": "usr_000550",
+    "method_id": "payoneer",
+    "amount_usd": 665.33,
+    "status": "completed",
+    "created_at": "2026-07-06T22:42:42Z",
+    "completed_at": "2026-07-08T01:33:16Z"
+  },
+  {
+    "id": "dep_000150",
+    "user_id": "usr_000165",
+    "method_id": "payoneer",
+    "amount_usd": 234.11,
+    "status": "completed",
+    "created_at": "2026-07-11T02:31:10Z",
+    "completed_at": "2026-07-11T12:49:31Z"
+  },
+  {
+    "id": "dep_000151",
+    "user_id": "usr_000373",
+    "method_id": "wise",
+    "amount_usd": 573.44,
+    "status": "completed",
+    "created_at": "2026-07-08T02:54:21Z",
+    "completed_at": "2026-07-08T05:01:07Z"
+  },
+  {
+    "id": "dep_000152",
+    "user_id": "usr_000531",
+    "method_id": "crypto_usdt",
+    "amount_usd": 137.77,
+    "status": "completed",
+    "created_at": "2026-07-13T14:02:58Z",
+    "completed_at": "2026-07-14T22:15:47Z"
+  },
+  {
+    "id": "dep_000153",
+    "user_id": "usr_000575",
+    "method_id": "crypto_usdt",
+    "amount_usd": 168.03,
+    "status": "completed",
+    "created_at": "2026-07-12T06:41:00Z",
+    "completed_at": "2026-07-14T10:16:26Z"
+  },
+  {
+    "id": "dep_000154",
+    "user_id": "usr_000453",
+    "method_id": "crypto_usdt",
+    "amount_usd": 242.79,
+    "status": "completed",
+    "created_at": "2026-07-12T22:31:56Z",
+    "completed_at": "2026-07-15T07:01:10Z"
+  },
+  {
+    "id": "dep_000155",
+    "user_id": "usr_000110",
+    "method_id": "paypal",
+    "amount_usd": 1157.95,
+    "status": "completed",
+    "created_at": "2026-07-13T21:24:53Z",
+    "completed_at": "2026-07-15T03:23:05Z"
+  },
+  {
+    "id": "dep_000156",
+    "user_id": "usr_000081",
+    "method_id": "paypal",
+    "amount_usd": 70.54,
+    "status": "completed",
+    "created_at": "2026-07-12T19:54:39Z",
+    "completed_at": "2026-07-15T02:08:59Z"
+  },
+  {
+    "id": "dep_000157",
+    "user_id": "usr_000370",
+    "method_id": "wire_us",
+    "amount_usd": 243.7,
+    "status": "completed",
+    "created_at": "2026-07-17T04:08:46Z",
+    "completed_at": "2026-07-18T23:54:14Z"
+  },
+  {
+    "id": "dep_000158",
+    "user_id": "usr_000395",
+    "method_id": "payoneer",
+    "amount_usd": 296.47,
+    "status": "completed",
+    "created_at": "2026-07-10T11:24:35Z",
+    "completed_at": "2026-07-12T13:10:55Z"
+  },
+  {
+    "id": "dep_000159",
+    "user_id": "usr_000504",
+    "method_id": "crypto_usdc",
+    "amount_usd": 202.29,
+    "status": "completed",
+    "created_at": "2026-07-18T07:05:17Z",
+    "completed_at": "2026-07-20T09:30:07Z"
+  },
+  {
+    "id": "dep_000160",
+    "user_id": "usr_000360",
+    "method_id": "wise",
+    "amount_usd": 466.97,
+    "status": "completed",
+    "created_at": "2026-07-12T11:28:48Z",
+    "completed_at": "2026-07-14T00:03:53Z"
+  },
+  {
+    "id": "dep_000161",
+    "user_id": "usr_000512",
+    "method_id": "wise",
+    "amount_usd": 225.37,
+    "status": "completed",
+    "created_at": "2026-07-16T19:17:46Z",
+    "completed_at": "2026-07-17T14:42:09Z"
+  },
+  {
+    "id": "dep_000162",
+    "user_id": "usr_000497",
+    "method_id": "paypal",
+    "amount_usd": 95.41,
+    "status": "completed",
+    "created_at": "2026-07-19T10:34:17Z",
+    "completed_at": "2026-07-21T00:32:01Z"
+  },
+  {
+    "id": "dep_000163",
+    "user_id": "usr_000244",
+    "method_id": "local_ar",
+    "amount_usd": 242.46,
+    "status": "completed",
+    "created_at": "2026-07-18T16:16:58Z",
+    "completed_at": "2026-07-20T04:47:31Z"
+  },
+  {
+    "id": "dep_000164",
+    "user_id": "usr_000228",
+    "method_id": "payoneer",
+    "amount_usd": 55.25,
+    "status": "completed",
+    "created_at": "2026-07-14T14:47:24Z",
+    "completed_at": "2026-07-14T19:05:07Z"
+  },
+  {
+    "id": "dep_000165",
+    "user_id": "usr_000553",
+    "method_id": "paypal",
+    "amount_usd": 107.2,
+    "status": "completed",
+    "created_at": "2026-07-20T03:53:07Z",
+    "completed_at": "2026-07-22T03:40:04Z"
+  },
+  {
+    "id": "dep_000166",
+    "user_id": "usr_000119",
+    "method_id": "payoneer",
+    "amount_usd": 1174.46,
+    "status": "completed",
+    "created_at": "2026-07-21T08:59:09Z",
+    "completed_at": "2026-07-21T12:48:11Z"
+  },
+  {
+    "id": "dep_000167",
+    "user_id": "usr_000053",
+    "method_id": "wire_us",
+    "amount_usd": 406.47,
+    "status": "completed",
+    "created_at": "2026-07-23T04:56:49Z",
+    "completed_at": "2026-07-23T12:21:26Z"
+  },
+  {
+    "id": "dep_000168",
+    "user_id": "usr_000581",
+    "method_id": "wire_us",
+    "amount_usd": 107.42,
+    "status": "completed",
+    "created_at": "2026-07-20T07:32:41Z",
+    "completed_at": "2026-07-20T15:36:30Z"
+  },
+  {
+    "id": "dep_000169",
+    "user_id": "usr_000115",
+    "method_id": "wire_us",
+    "amount_usd": 3739.56,
+    "status": "completed",
+    "created_at": "2026-07-18T07:32:55Z",
+    "completed_at": "2026-07-20T06:04:25Z"
+  },
+  {
+    "id": "dep_000170",
+    "user_id": "usr_000375",
+    "method_id": "paypal",
+    "amount_usd": 259.0,
+    "status": "completed",
+    "created_at": "2026-07-21T17:13:02Z",
+    "completed_at": "2026-07-22T04:44:57Z"
+  },
+  {
+    "id": "dep_000171",
+    "user_id": "usr_000336",
+    "method_id": "paypal",
+    "amount_usd": 163.9,
+    "status": "completed",
+    "created_at": "2026-07-21T17:33:05Z",
+    "completed_at": "2026-07-24T02:02:15Z"
+  },
+  {
+    "id": "dep_000172",
+    "user_id": "usr_000358",
+    "method_id": "wise",
+    "amount_usd": 538.6,
+    "status": "completed",
+    "created_at": "2026-07-24T00:49:50Z",
+    "completed_at": "2026-07-25T10:36:14Z"
+  },
+  {
+    "id": "dep_000173",
+    "user_id": "usr_000301",
+    "method_id": "payoneer",
+    "amount_usd": 954.97,
+    "status": "completed",
+    "created_at": "2026-07-18T07:25:27Z",
+    "completed_at": "2026-07-19T19:25:55Z"
+  },
+  {
+    "id": "dep_000174",
+    "user_id": "usr_000511",
+    "method_id": "wire_us",
+    "amount_usd": 706.62,
+    "status": "completed",
+    "created_at": "2026-07-21T14:39:41Z",
+    "completed_at": "2026-07-22T15:54:06Z"
+  },
+  {
+    "id": "dep_000175",
+    "user_id": "usr_000084",
+    "method_id": "wise",
+    "amount_usd": 962.29,
+    "status": "completed",
+    "created_at": "2026-07-23T02:04:09Z",
+    "completed_at": "2026-07-24T18:28:19Z"
+  },
+  {
+    "id": "dep_000176",
+    "user_id": "usr_000015",
+    "method_id": "wise",
+    "amount_usd": 239.66,
+    "status": "completed",
+    "created_at": "2026-07-23T19:31:04Z",
+    "completed_at": "2026-07-26T02:11:49Z"
+  },
+  {
+    "id": "dep_000177",
+    "user_id": "usr_000205",
+    "method_id": "wise",
+    "amount_usd": 211.19,
+    "status": "completed",
+    "created_at": "2026-07-22T05:40:02Z",
+    "completed_at": "2026-07-22T15:08:42Z"
+  },
+  {
+    "id": "dep_000178",
+    "user_id": "usr_000321",
+    "method_id": "wire_us",
+    "amount_usd": 74.5,
+    "status": "completed",
+    "created_at": "2026-07-20T21:33:20Z",
+    "completed_at": "2026-07-21T23:48:51Z"
+  },
+  {
+    "id": "dep_000179",
+    "user_id": "usr_000080",
+    "method_id": "wire_us",
+    "amount_usd": 1141.63,
+    "status": "completed",
+    "created_at": "2026-07-28T12:24:10Z",
+    "completed_at": "2026-07-30T12:05:45Z"
+  },
+  {
+    "id": "dep_000180",
+    "user_id": "usr_000109",
+    "method_id": "local_ar",
+    "amount_usd": 1113.22,
+    "status": "completed",
+    "created_at": "2026-07-27T20:57:57Z",
+    "completed_at": "2026-07-28T03:57:21Z"
+  },
+  {
+    "id": "dep_000181",
+    "user_id": "usr_000402",
+    "method_id": "crypto_usdt",
+    "amount_usd": 285.95,
+    "status": "completed",
+    "created_at": "2026-07-25T15:22:28Z",
+    "completed_at": "2026-07-25T19:52:03Z"
+  },
+  {
+    "id": "dep_000182",
+    "user_id": "usr_000027",
+    "method_id": "local_co",
+    "amount_usd": 71.53,
+    "status": "completed",
+    "created_at": "2026-07-25T21:36:15Z",
+    "completed_at": "2026-07-28T04:47:58Z"
+  },
+  {
+    "id": "dep_000183",
+    "user_id": "usr_000307",
+    "method_id": "local_ar",
+    "amount_usd": 265.16,
+    "status": "completed",
+    "created_at": "2026-07-27T13:18:37Z",
+    "completed_at": "2026-07-28T14:51:21Z"
+  },
+  {
+    "id": "dep_000184",
+    "user_id": "usr_000087",
+    "method_id": "local_ar",
+    "amount_usd": 787.21,
+    "status": "completed",
+    "created_at": "2026-07-26T12:58:33Z",
+    "completed_at": "2026-07-28T14:47:43Z"
+  },
+  {
+    "id": "dep_000185",
+    "user_id": "usr_000447",
+    "method_id": "crypto_usdt",
+    "amount_usd": 552.94,
+    "status": "completed",
+    "created_at": "2026-07-27T07:57:52Z",
+    "completed_at": "2026-07-28T20:58:18Z"
+  },
+  {
+    "id": "dep_000186",
+    "user_id": "usr_000536",
+    "method_id": "paypal",
+    "amount_usd": 226.5,
+    "status": "completed",
+    "created_at": "2026-07-29T12:06:33Z",
+    "completed_at": "2026-07-31T10:10:52Z"
+  },
+  {
+    "id": "dep_000187",
+    "user_id": "usr_000394",
+    "method_id": "local_mx",
+    "amount_usd": 231.68,
+    "status": "completed",
+    "created_at": "2026-07-29T01:38:55Z",
+    "completed_at": "2026-07-30T14:20:50Z"
+  },
+  {
+    "id": "dep_000188",
+    "user_id": "usr_000338",
+    "method_id": "wise",
+    "amount_usd": 226.79,
+    "status": "completed",
+    "created_at": "2026-07-30T06:50:59Z",
+    "completed_at": "2026-08-01T06:10:06Z"
+  },
+  {
+    "id": "dep_000189",
+    "user_id": "usr_000250",
+    "method_id": "local_ar",
+    "amount_usd": 215.87,
+    "status": "completed",
+    "created_at": "2026-07-27T07:50:35Z",
+    "completed_at": "2026-07-28T07:38:07Z"
+  },
+  {
+    "id": "dep_000190",
+    "user_id": "usr_000428",
+    "method_id": "paypal",
+    "amount_usd": 261.49,
+    "status": "completed",
+    "created_at": "2026-07-25T16:40:59Z",
+    "completed_at": "2026-07-26T07:44:08Z"
+  },
+  {
+    "id": "dep_000191",
+    "user_id": "usr_000434",
+    "method_id": "payoneer",
+    "amount_usd": 73.33,
+    "status": "completed",
+    "created_at": "2026-07-25T10:53:15Z",
+    "completed_at": "2026-07-25T21:16:24Z"
+  },
+  {
+    "id": "dep_000192",
+    "user_id": "usr_000357",
+    "method_id": "wire_us",
+    "amount_usd": 90.97,
+    "status": "completed",
+    "created_at": "2026-07-31T03:23:22Z",
+    "completed_at": "2026-08-02T01:20:21Z"
+  },
+  {
+    "id": "dep_000193",
+    "user_id": "usr_000348",
+    "method_id": "crypto_usdt",
+    "amount_usd": 133.31,
+    "status": "completed",
+    "created_at": "2026-07-31T20:16:32Z",
+    "completed_at": "2026-08-02T03:10:03Z"
+  },
+  {
+    "id": "dep_000194",
+    "user_id": "usr_000004",
+    "method_id": "payoneer",
+    "amount_usd": 5617.25,
+    "status": "completed",
+    "created_at": "2026-07-28T20:33:32Z",
+    "completed_at": "2026-07-31T00:27:16Z"
+  },
+  {
+    "id": "dep_000195",
+    "user_id": "usr_000170",
+    "method_id": "wise",
+    "amount_usd": 570.89,
+    "status": "completed",
+    "created_at": "2026-07-29T08:45:46Z",
+    "completed_at": "2026-07-31T18:23:56Z"
+  },
+  {
+    "id": "dep_000196",
+    "user_id": "usr_000374",
+    "method_id": "paypal",
+    "amount_usd": 69.38,
+    "status": "completed",
+    "created_at": "2026-07-31T10:53:25Z",
+    "completed_at": "2026-07-31T15:19:40Z"
+  },
+  {
+    "id": "dep_000197",
+    "user_id": "usr_000242",
+    "method_id": "payoneer",
+    "amount_usd": 77.71,
+    "status": "completed",
+    "created_at": "2026-07-31T14:21:17Z",
+    "completed_at": "2026-08-02T11:15:21Z"
+  },
+  {
+    "id": "dep_000198",
+    "user_id": "usr_000034",
+    "method_id": "wise",
+    "amount_usd": 588.4,
+    "status": "completed",
+    "created_at": "2026-07-30T10:16:16Z",
+    "completed_at": "2026-07-31T00:30:55Z"
+  },
+  {
+    "id": "dep_000199",
+    "user_id": "usr_000059",
+    "method_id": "paypal",
+    "amount_usd": 512.46,
+    "status": "completed",
+    "created_at": "2026-07-30T02:01:31Z",
+    "completed_at": "2026-08-01T11:33:10Z"
+  },
+  {
+    "id": "dep_000200",
+    "user_id": "usr_000166",
+    "method_id": "payoneer",
+    "amount_usd": 112.04,
+    "status": "completed",
+    "created_at": "2026-07-31T00:35:04Z",
+    "completed_at": "2026-08-02T08:59:29Z"
+  },
+  {
+    "id": "dep_000201",
+    "user_id": "usr_000483",
+    "method_id": "crypto_usdc",
+    "amount_usd": 109.87,
+    "status": "completed",
+    "created_at": "2026-07-30T01:10:38Z",
+    "completed_at": "2026-07-30T05:25:21Z"
+  }
+]
