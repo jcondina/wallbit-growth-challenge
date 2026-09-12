@@ -61,6 +61,14 @@ export function insertInboxIfMissing(db: Db, e: InboxEntry): boolean {
   return result.changes === 1;
 }
 
+/** Anomalies the reducer discovers are only known after the row exists. */
+export function updateInboxAnomalies(db: Db, eventId: string, anomalies: string[]): void {
+  db.prepare("UPDATE webhook_inbox SET anomalies = ? WHERE event_id = ?").run(
+    anomalies.length === 0 ? null : JSON.stringify(anomalies),
+    eventId,
+  );
+}
+
 export function getInboxEntry(db: Db, eventId: string): InboxEntry | null {
   const row = queryOne<Row>(db, "SELECT * FROM webhook_inbox WHERE event_id = ?", eventId);
   return row ? toEntry(row) : null;

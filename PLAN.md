@@ -167,6 +167,7 @@ under any timezone and what you can extend live without touching I/O.
 │   │   ├── verdict.ts            verdict state machine + Spanish templates
 │   │   └── funnel.ts             pure funnel computation over event rows
 │   ├── infra/
+│   │   ├── config.ts             env → typed config, every value defaulted
 │   │   ├── db.ts                 DatabaseSync singleton (globalThis-cached), schema bootstrap, tx helper
 │   │   ├── schema.sql
 │   │   └── repos/
@@ -181,6 +182,7 @@ under any timezone and what you can extend live without touching I/O.
 │   │   ├── seed.ts               fixtures → tables + enrollment (CLI in scripts/seed.ts)
 │   │   ├── enrollUser.ts         getOrCreateAssignment (eligibility-gated, status-gated)
 │   │   ├── ingestWebhook.ts      verify → parse → inbox → reduce → upsert → emit
+│   │   ├── webhookSignature.ts   HMAC-SHA256 over raw bytes, constant-time compare
 │   │   ├── trackEvent.ts         validate against catalogue, stamp, store
 │   │   ├── experimentResults.ts  read model (cohort = experiment | baseline)
 │   │   ├── funnelResults.ts      read model over events
@@ -858,9 +860,17 @@ forward from Phase 4: the domain alone reproduces §19 from `scenario.json`
 A 113/296, B 97/304) and is invariant to a double replay and to reversed
 delivery order.
 
-**Phase 3 — Webhook ingestion.**
+**Phase 3 — Webhook ingestion.** ✅ `phase-3` commit.
 `ingestWebhook.ts`, route, inbox, domain events, `replay.sh`. *Accept:* §7.3
 numbers; second replay identical; `ingestWebhook.test.ts` green.
+*As built:* `services/webhookSignature.ts` (HMAC over raw bytes, length
+check before `timingSafeEqual`), `infra/config.ts` (env with defaults).
+Ingestion anomalies: `user_unknown`, `method_unknown`, `non_positive_amount`,
+`deposit_before_signup`, `country_mismatch`, `occurred_in_future` (+5 min
+tolerance) plus the reducer's `user_mismatch`/`method_mismatch`; all stored on
+the inbox row, none rejected. Live run: 648 deliveries → 606 inbox / 299
+deposits (254/45/0) / 598 domain events, ~3 ms per webhook; second replay left
+the database byte-identical (648 duplicates).
 
 **Phase 4 — Results read model, stats, verdict, JSON, verify.**
 `experimentResults.ts`, `stats.ts`, `verdict.ts`, `/api/results`,

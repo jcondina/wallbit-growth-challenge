@@ -1,5 +1,5 @@
 import type { FundingMethod, MethodKind } from "@/domain/fundingMethod";
-import { type Db, queryAll, queryRow } from "../db";
+import { type Db, queryAll, queryOne, queryRow } from "../db";
 
 export type { FundingMethod, MethodKind };
 
@@ -35,6 +35,11 @@ export function upsertFundingMethods(db: Db, methods: FundingMethod[]): void {
   for (const m of methods) {
     stmt.run(m.id, m.name, m.kind, m.currency, JSON.stringify(m.countries), m.settlementHours, m.feePct);
   }
+}
+
+export function getFundingMethod(db: Db, id: string): FundingMethod | null {
+  const row = queryOne<Row>(db, "SELECT * FROM funding_methods WHERE id = ?", id);
+  return row ? toMethod(row) : null;
 }
 
 export function listFundingMethods(db: Db): FundingMethod[] {
