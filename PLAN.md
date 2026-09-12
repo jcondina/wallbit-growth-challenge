@@ -155,11 +155,13 @@ under any timezone and what you can extend live without touching I/O.
 ├── src/
 │   ├── domain/
 │   │   ├── time.ts               Instant, Duration, parseInstant, formatInstant, hours, elapsed, isWithin, Clock
-│   │   ├── experiment.ts         Experiment type, isEligible, isRunning, windowFor
+│   │   ├── experiment.ts         Experiment type, isEligible, isRunning, activationWindow
+│   │   ├── fundingMethod.ts      FundingMethod type, isAvailableIn
+│   │   ├── provider.ts           zod contract for the raw webhook payload → DepositEvent
 │   │   ├── assignment.ts         hashBucket, variantFor(experiment, userId)
 │   │   ├── recommendation.ts     eligibleMethodsFor, recommendedMethodFor
-│   │   ├── deposit.ts            Deposit state + applyWebhookEvent (pure reducer)
-│   │   ├── activation.ts         isActivated, initiatedInWindow
+│   │   ├── deposit.ts            Deposit state + applyDepositEvent (pure reducer), statusOf
+│   │   ├── activation.ts         isActivated, firstCompletedAt, summarizeActivation
 │   │   ├── events.ts             event catalogue: names, envelope, zod schemas
 │   │   ├── stats.ts              wilsonCI, twoProportionZTest, diffCI, mde, requiredPerArm, pBBeatsA
 │   │   ├── verdict.ts            verdict state machine + Spanish templates
@@ -842,9 +844,19 @@ rows as `Record<string, SQLOutputValue>`. Turbopack warns that the
 runtime-configurable DB path defeats output-file tracing — irrelevant without
 a standalone deploy, noted here so nobody chases it.
 
-**Phase 2 — Domain rules.**
+**Phase 2 — Domain rules.** ✅ `phase-2` commit.
 `experiment`, `assignment`, `recommendation`, `deposit`, `activation` + tests.
 *Accept:* all green under `npm run test:tz`.
+*As built:* `domain/fundingMethod.ts` and `domain/provider.ts` (zod contract
+for the raw webhook payload → typed `DepositEvent`) were added so the repos
+import types from the domain, not the reverse. The permutation test caught a
+real order-dependence in the reducer (amount followed the *last* final event
+in a `completed`+`failed` conflict); payload fields now follow event-type
+precedence `completed > failed > received`. `tests/replay.test.ts` came
+forward from Phase 4: the domain alone reproduces §19 from `scenario.json`
+(606 unique / 42 dupes / 299 deposits / 598 transitions / 210 of 600 /
+A 113/296, B 97/304) and is invariant to a double replay and to reversed
+delivery order.
 
 **Phase 3 — Webhook ingestion.**
 `ingestWebhook.ts`, route, inbox, domain events, `replay.sh`. *Accept:* §7.3

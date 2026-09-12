@@ -1,21 +1,11 @@
+import type { DepositState, DepositStatus } from "@/domain/deposit";
 import { type Instant, instant } from "@/domain/time";
 import { type Db, bool, nullable, queryAll, queryOne } from "../db";
 
-export type DepositStatus = "received" | "completed" | "failed" | "conflict";
 export type DepositSource = "webhook" | "historical";
 
-export interface DepositRecord {
-  id: string;
-  userId: string;
-  methodId: string;
-  amountUsd: number;
-  currency: string | null;
-  country: string | null;
-  status: DepositStatus;
-  /** Webhook: earliest `deposit.received` occurred_at. Historical: the fixture's created_at. */
-  initiatedAt: Instant | null;
-  completedAt: Instant | null;
-  failedAt: Instant | null;
+/** The domain state plus its persistence envelope. */
+export interface DepositRecord extends DepositState {
   source: DepositSource;
   userKnown: boolean;
   updatedAt: Instant;
