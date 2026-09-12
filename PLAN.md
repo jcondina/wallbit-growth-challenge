@@ -164,7 +164,7 @@ under any timezone and what you can extend live without touching I/O.
 │   │   ├── activation.ts         isActivated, firstCompletedAt, summarizeActivation
 │   │   ├── events.ts             event catalogue: names, envelope, zod schemas
 │   │   ├── stats.ts              wilsonCI, twoProportionZTest, diffCI, mde, requiredPerArm, pBBeatsA
-│   │   ├── verdict.ts            verdict state machine + Spanish templates
+│   │   ├── verdict.ts            verdict state machine (Spanish templates live in content/verdict.ts)
 │   │   └── funnel.ts             pure funnel computation over event rows
 │   ├── infra/
 │   │   ├── config.ts             env → typed config, every value defaulted
@@ -208,10 +208,11 @@ under any timezone and what you can extend live without touching I/O.
 │   │   └── results/              Verdict, PrimaryTable, BaselineCard, MechanismTable, GuardrailsTable, CountryTable, DataQuality, Power
 │   ├── lib/
 │   │   ├── analytics.ts          client track(): envelope, session id, sendBeacon
-│   │   └── format.ts             es-AR number/percent/date formatting
+│   │   └── format.ts             es-AR number/percent/date formatting (the only place Instant meets a locale)
 │   └── content/
 │       ├── fundingInstructions.ts  method → fake sandbox fields to copy
-│       └── copy.ts                 Spanish UI strings
+│       ├── verdict.ts              Spanish verdict sentence + tone
+│       └── copy.ts                 Spanish UI strings, metric definition, caveats
 ├── tests/
 │   ├── domain/                   time, assignment, recommendation, deposit, activation, stats, verdict, funnel, events
 │   ├── services/                 ingestWebhook (in-memory db), trackEvent
@@ -872,10 +873,20 @@ the inbox row, none rejected. Live run: 648 deliveries → 606 inbox / 299
 deposits (254/45/0) / 598 domain events, ~3 ms per webhook; second replay left
 the database byte-identical (648 duplicates).
 
-**Phase 4 — Results read model, stats, verdict, JSON, verify.**
+**Phase 4 — Results read model, stats, verdict, JSON, verify.** ✅ `phase-4` commit.
 `experimentResults.ts`, `stats.ts`, `verdict.ts`, `/api/results`,
 `scripts/verify.py`. *Accept:* `A 113/296, B 97/304`, baseline `138/600`,
 `npm run verify` prints `MATCH`; `replay.test.ts` green.
+*As built:* `webhook_inbox.deliveries` counter (guarded `ALTER TABLE`
+migration in `db.ts`) so the data-quality panel can show 648 / 606 / 42.
+Verdict *decision* is domain (`verdict.ts`); the Spanish *sentence* is
+presentation (`content/verdict.ts`) because it needs `Intl`. `lib/format.ts`
+holds all es-AR formatting. The read model measures mechanism/timing rows
+over ever-converted users; failure rate only over webhook-sourced deposits
+(historical data has none → baseline shows *sin datos*). The power table uses
+the control rate and the observed signup pace (1 639/month = 600 users in 11
+days), not the planning-time 600/month assumption — so "+5 pp" reads ~1.8
+months here. Live: `npm run verify` → `MATCH` on 20 fields.
 
 **Phase 5 — UI system, funding screens, tracking, funnel.**
 tokens + primitives; `FundingScreen` A/B + instructions + ribbon + preview;

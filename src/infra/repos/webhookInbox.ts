@@ -61,6 +61,11 @@ export function insertInboxIfMissing(db: Db, e: InboxEntry): boolean {
   return result.changes === 1;
 }
 
+/** A redelivery of a known event_id: nothing to apply, but the count is evidence for the data-quality panel. */
+export function countRedelivery(db: Db, eventId: string): void {
+  db.prepare("UPDATE webhook_inbox SET deliveries = deliveries + 1 WHERE event_id = ?").run(eventId);
+}
+
 /** Anomalies the reducer discovers are only known after the row exists. */
 export function updateInboxAnomalies(db: Db, eventId: string, anomalies: string[]): void {
   db.prepare("UPDATE webhook_inbox SET anomalies = ? WHERE event_id = ?").run(
@@ -75,7 +80,11 @@ export function getInboxEntry(db: Db, eventId: string): InboxEntry | null {
 }
 
 export interface InboxStats {
+  /** Every delivery the provider made, duplicates included. */
+  deliveries: number;
   uniqueEvents: number;
+  /** Same deposit_id + type under more than one event_id (PROVIDER.md guarantee 2). */
+  resends: number;
   withAnomalies: number;
   headerMismatches: number;
   unsigned: number;
@@ -84,21 +93,30 @@ export interface InboxStats {
 
 export function inboxStats(db: Db): InboxStats {
   const r = queryRow<{
+    deliveries: number | null;
     unique_events: number;
     with_anomalies: number | null;
     header_mismatches: number | null;
     unsigned: number | null;
     last_occurred_at: number | null;
   }>(db, `
-      SELECT COUNT(*) AS unique_events,
+      SELECT SUM(deliveries) AS deliveries,
+             COUNT(*) AS unique_events,
              SUM(CASE WHEN anomalies IS NOT NULL THEN 1 ELSE 0 END) AS with_anomalies,
              SUM(header_mismatch) AS header_mismatches,
              SUM(CASE WHEN signature_ok = 0 THEN 1 ELSE 0 END) AS unsigned,
              MAX(occurred_at) AS last_occurred_at
       FROM webhook_inbox
     `);
+  const resends = queryRow<{ n: number }>(db, `
+      SELECT COUNT(*) AS n FROM (
+        SELECT deposit_id, event_type FROM webhook_inbox GROUP BY deposit_id, event_type HAVING COUNT(*) > 1
+      )
+    `).n;
   return {
+    deliveries: r.deliveries ?? 0,
     uniqueEvents: r.unique_events,
+    resends,
     withAnomalies: r.with_anomalies ?? 0,
     headerMismatches: r.header_mismatches ?? 0,
     unsigned: r.unsigned ?? 0,

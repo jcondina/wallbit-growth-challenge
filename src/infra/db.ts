@@ -30,7 +30,17 @@ export function openDb(filePath: string = process.env.DB_PATH ?? DEFAULT_DB_PATH
   db.exec("PRAGMA busy_timeout = 5000");
   db.exec("PRAGMA foreign_keys = ON");
   db.exec(readFileSync(SCHEMA_PATH, "utf8"));
+  migrate(db);
   return db;
+}
+
+// Additive, idempotent migrations for files created by an earlier schema.
+// (CREATE TABLE IF NOT EXISTS does not add columns to existing tables.)
+function migrate(db: Db): void {
+  const columns = (db.prepare("PRAGMA table_info(webhook_inbox)").all() as { name: string }[]).map((c) => c.name);
+  if (!columns.includes("deliveries")) {
+    db.exec("ALTER TABLE webhook_inbox ADD COLUMN deliveries INTEGER NOT NULL DEFAULT 1");
+  }
 }
 
 declare global {

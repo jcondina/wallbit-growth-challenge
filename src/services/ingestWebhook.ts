@@ -10,7 +10,7 @@ import { getDeposit, upsertDeposit } from "@/infra/repos/deposits";
 import { insertEventIfMissing } from "@/infra/repos/events";
 import { getFundingMethod } from "@/infra/repos/fundingMethods";
 import { getUser } from "@/infra/repos/users";
-import { insertInboxIfMissing, updateInboxAnomalies } from "@/infra/repos/webhookInbox";
+import { countRedelivery, insertInboxIfMissing, updateInboxAnomalies } from "@/infra/repos/webhookInbox";
 import { verifySignature } from "./webhookSignature";
 
 /**
@@ -115,7 +115,10 @@ export function ingestWebhook(deps: IngestDeps, input: IngestInput): IngestOutco
       anomalies,
       payload: input.rawBody.toString("utf8"),
     });
-    if (!firstDelivery) return { kind: "duplicate", eventId: event.eventId };
+    if (!firstDelivery) {
+      countRedelivery(db, event.eventId);
+      return { kind: "duplicate", eventId: event.eventId };
+    }
 
     const current = getDeposit(db, event.depositId);
     const result = applyDepositEvent(current, event);

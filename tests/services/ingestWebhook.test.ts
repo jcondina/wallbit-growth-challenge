@@ -205,7 +205,7 @@ describe("ingestWebhook — the whole scenario, twice", () => {
       events: countEventsByName(db),
     });
     const after1 = snapshot();
-    expect(after1.inbox).toMatchObject({ uniqueEvents: 606, withAnomalies: 0, headerMismatches: 0, unsigned: 0 });
+    expect(after1.inbox).toMatchObject({ deliveries: 648, uniqueEvents: 606, resends: 8, withAnomalies: 0, headerMismatches: 0, unsigned: 0 });
     expect(after1.inbox.lastOccurredAt).toBe(parseInstant("2026-08-30T15:27:00Z"));
     expect(after1.deposits).toBe(299);
     expect(after1.byStatus).toEqual({ completed: 254, failed: 45 });
@@ -213,6 +213,8 @@ describe("ingestWebhook — the whole scenario, twice", () => {
 
     const second = replayAll(deps);
     expect(second).toEqual({ processed: 0, noop: 0, duplicate: 648, other: 0 });
-    expect(snapshot()).toEqual(after1);
+    const after2 = snapshot();
+    expect(after2.inbox.deliveries).toBe(1296); // the only thing a full redelivery may change
+    expect({ ...after2, inbox: { ...after2.inbox, deliveries: 0 } }).toEqual({ ...after1, inbox: { ...after1.inbox, deliveries: 0 } });
   });
 });

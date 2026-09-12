@@ -63,6 +63,7 @@ CREATE TABLE IF NOT EXISTS webhook_inbox (
   header_mismatch INTEGER NOT NULL DEFAULT 0 CHECK (header_mismatch IN (0, 1)),
   anomalies       TEXT,                    -- JSON array of strings; NULL when clean
   payload         TEXT NOT NULL,           -- raw body as delivered
+  deliveries      INTEGER NOT NULL DEFAULT 1,  -- how many times this event_id arrived (at-least-once)
   occurred_at_iso TEXT GENERATED ALWAYS AS
     (strftime('%Y-%m-%dT%H:%M:%fZ', occurred_at / 1000.0, 'unixepoch')) VIRTUAL
 );

@@ -10,6 +10,7 @@
     "db:reset": "tsx scripts/reset.ts",
     "seed": "tsx scripts/seed.ts",
     "replay": "bash scripts/replay.sh",
+    "verify": "python3 scripts/verify.py",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
