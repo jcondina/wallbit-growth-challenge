@@ -69,7 +69,7 @@ Todas las páginas comparten la barra de navegación de arriba.
 
 | URL | Qué es |
 |---|---|
-| `/` | Índice: un usuario de muestra por país y uno anterior al experimento, con enlaces a su pantalla |
+| `/` | Portada: qué es esto y qué pregunta responde, los números en vivo, qué se puede hacer, y usuarios de muestra (uno por país y uno anterior al experimento) con enlaces a su pantalla |
 | `/u/<usuario>/fund` | La pantalla de ingreso de dinero, en la variante que le toca a ese usuario (no hay login: la URL dice quién es) |
 | `/u/<usuario>/fund?preview=A` / `?preview=B` | La misma pantalla en una variante elegida, sin asignar ni registrar eventos |
 | `/results` | El resultado del experimento para Growth |

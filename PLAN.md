@@ -988,7 +988,10 @@ page. `/results` shows a warning pill and a data-quality row while simulated
 deposits exist; `verify.py` will (correctly) report MISMATCH until they are
 removed. Test: deleting simulated data restores results and funnel byte for
 byte. `components/nav/SiteNav.tsx` in the root layout: every route one click
-away, current section highlighted, no prefetch. Journey constants live in
+away, current section highlighted, no prefetch. `/` is a landing page: the
+question, the case, two CTAs, four live numbers, the current verdict, the
+hypothesis as two cards, four action cards, the five-step flow, and the
+sample-user table. Journey constants live in
 `content/journeys.ts` so the client bundle never imports the service.
 
 ---
