@@ -4,7 +4,7 @@ import { z } from "zod";
 import { variantFor } from "@/domain/assignment";
 import { SCHEMA_VERSION, assignmentEventId } from "@/domain/events";
 import { type Experiment, FUNDING_EXPERIMENT, isEligible } from "@/domain/experiment";
-import { type Clock, parseInstant, systemClock } from "@/domain/time";
+import { type Clock, type Instant, parseInstant, systemClock } from "@/domain/time";
 import { type Db, tx } from "@/infra/db";
 import { countAssignmentsByVariant, insertAssignmentIfMissing } from "@/infra/repos/assignments";
 import { countDepositsByStatus, insertDepositIfMissing } from "@/infra/repos/deposits";
@@ -84,122 +84,125 @@ function loadJson<T>(dataDir: string, file: string, schema: z.ZodType<T>): T[] {
 export function seedDatabase(db: Db, options: SeedOptions = {}): SeedReport {
   const dataDir = options.dataDir ?? path.join(process.cwd(), "data");
   const experiment = options.experiment ?? FUNDING_EXPERIMENT;
-  const clock = options.clock ?? systemClock;
+  const now = (options.clock ?? systemClock).now();
 
   const users = loadJson(dataDir, "users.json", UserFixture);
   const methods = loadJson(dataDir, "funding_methods.json", MethodFixture);
-  const deposits = loadJson(dataDir, "deposits_historicos.json", HistoricalDepositFixture);
+  const historical = loadJson(dataDir, "deposits_historicos.json", HistoricalDepositFixture);
 
   return tx(db, () => {
-    const usersBefore = countUsers(db);
-    upsertUsers(
-      db,
-      users.map((u) => ({
-        id: u.id,
-        email: u.email,
-        country: u.country,
-        createdAt: u.created_at,
-        kycStatus: u.kyc_status,
-      })),
-    );
-
-    const methodsBefore = countFundingMethods(db);
-    upsertFundingMethods(
-      db,
-      methods.map((m) => ({
-        id: m.id,
-        name: m.name,
-        kind: m.kind,
-        currency: m.currency,
-        countries: m.countries,
-        settlementHours: m.settlement_hours,
-        feePct: m.fee_pct,
-      })),
-    );
-
-    const now = clock.now();
-    const userById = new Map(users.map((u) => [u.id, u]));
-    let depositsAdded = 0;
-    for (const d of deposits) {
-      const user = userById.get(d.user_id);
-      const inserted = insertDepositIfMissing(db, {
-        id: d.id,
-        userId: d.user_id,
-        methodId: d.method_id,
-        amountUsd: d.amount_usd,
-        currency: null,
-        country: user?.country ?? null,
-        status: "completed",
-        initiatedAt: d.created_at,
-        completedAt: d.completed_at,
-        failedAt: null,
-        source: "historical",
-        userKnown: user !== undefined,
-        updatedAt: now,
-      });
-      if (inserted) depositsAdded += 1;
-    }
+    const usersReport = loadUsers(db, users);
+    const methodsReport = loadMethods(db, methods);
+    const depositsReport = loadHistoricalDeposits(db, historical, users, now);
 
     const experimentCreated = insertExperimentIfMissing(db, experiment);
     // Enroll against the stored row: a paused/changed experiment must not be
     // silently replaced by the constant on reseed.
     const stored = getExperiment(db, experiment.id);
     if (!stored) throw new Error(`experiment ${experiment.id} missing after insert`);
+    const enrollment = enrollEligibleUsers(db, stored, now);
 
-    let assignmentsAdded = 0;
-    let eventsAdded = 0;
-    let ineligible = 0;
-    for (const user of listUsers(db)) {
-      if (!isEligible(stored, user)) {
-        ineligible += 1;
-        continue;
-      }
-      const variant = variantFor(stored, user.id);
-      const inserted = insertAssignmentIfMissing(db, {
-        experimentId: stored.id,
-        userId: user.id,
-        variant,
-        allocationVersion: stored.allocationVersion,
-        assignedAt: user.createdAt,
-      });
-      if (inserted) assignmentsAdded += 1;
-
-      const eventInserted = insertEventIfMissing(db, {
-        eventId: assignmentEventId(stored.id, user.id),
-        name: "experiment_assigned",
-        userId: user.id,
-        occurredAt: user.createdAt,
-        recordedAt: now,
-        source: "system",
-        experimentId: stored.id,
-        variantShown: null,
-        country: user.country,
-        sessionId: null,
-        schemaVersion: SCHEMA_VERSION,
-        props: { variant, allocation_version: stored.allocationVersion },
-      });
-      if (eventInserted) eventsAdded += 1;
-    }
-
-    const historical = countDepositsByStatus(db, "historical");
     const eventCounts = countEventsByName(db);
     return {
-      users: { total: countUsers(db), added: countUsers(db) - usersBefore },
-      methods: { total: countFundingMethods(db), added: countFundingMethods(db) - methodsBefore },
-      historicalDeposits: {
-        total: historical.completed + historical.received + historical.failed + historical.conflict,
-        added: depositsAdded,
-      },
+      users: usersReport,
+      methods: methodsReport,
+      historicalDeposits: depositsReport,
       experiment: { id: stored.id, created: experimentCreated },
-      assignments: {
-        byVariant: countAssignmentsByVariant(db, stored.id),
-        added: assignmentsAdded,
-        ineligible,
-      },
-      events: {
-        total: Object.values(eventCounts).reduce((a, b) => a + b, 0),
-        added: eventsAdded,
-      },
+      assignments: { byVariant: countAssignmentsByVariant(db, stored.id), added: enrollment.added, ineligible: enrollment.ineligible },
+      events: { total: Object.values(eventCounts).reduce((a, b) => a + b, 0), added: enrollment.eventsAdded },
     };
   });
+}
+
+// ---- steps ------------------------------------------------------------------
+
+type UserFixture = z.infer<typeof UserFixture>;
+type MethodFixture = z.infer<typeof MethodFixture>;
+type HistoricalDepositFixture = z.infer<typeof HistoricalDepositFixture>;
+
+function loadUsers(db: Db, users: UserFixture[]) {
+  const before = countUsers(db);
+  upsertUsers(
+    db,
+    users.map((u) => ({ id: u.id, email: u.email, country: u.country, createdAt: u.created_at, kycStatus: u.kyc_status })),
+  );
+  const total = countUsers(db);
+  return { total, added: total - before };
+}
+
+function loadMethods(db: Db, methods: MethodFixture[]) {
+  const before = countFundingMethods(db);
+  upsertFundingMethods(
+    db,
+    methods.map((m) => ({
+      id: m.id,
+      name: m.name,
+      kind: m.kind,
+      currency: m.currency,
+      countries: m.countries,
+      settlementHours: m.settlement_hours,
+      feePct: m.fee_pct,
+    })),
+  );
+  const total = countFundingMethods(db);
+  return { total, added: total - before };
+}
+
+/** Historical deposits enter the same table as webhook ones, flagged by source, so the baseline reads through the same code. */
+function loadHistoricalDeposits(db: Db, deposits: HistoricalDepositFixture[], users: UserFixture[], now: Instant) {
+  const countryOf = new Map(users.map((u) => [u.id, u.country]));
+  let added = 0;
+  for (const d of deposits) {
+    const inserted = insertDepositIfMissing(db, {
+      id: d.id,
+      userId: d.user_id,
+      methodId: d.method_id,
+      amountUsd: d.amount_usd,
+      currency: null,
+      country: countryOf.get(d.user_id) ?? null,
+      status: "completed",
+      initiatedAt: d.created_at,
+      completedAt: d.completed_at,
+      failedAt: null,
+      source: "historical",
+      userKnown: countryOf.has(d.user_id),
+      updatedAt: now,
+    });
+    if (inserted) added += 1;
+  }
+  const counts = countDepositsByStatus(db, "historical");
+  return { total: Object.values(counts).reduce((a, b) => a + b, 0), added };
+}
+
+/** Intent-to-treat: every eligible user is assigned at signup time, whether or not they ever open the screen. */
+function enrollEligibleUsers(db: Db, experiment: Experiment, now: Instant) {
+  let added = 0;
+  let eventsAdded = 0;
+  let ineligible = 0;
+  for (const user of listUsers(db)) {
+    if (!isEligible(experiment, user)) {
+      ineligible += 1;
+      continue;
+    }
+    const variant = variantFor(experiment, user.id);
+    if (insertAssignmentIfMissing(db, { experimentId: experiment.id, userId: user.id, variant, allocationVersion: experiment.allocationVersion, assignedAt: user.createdAt })) {
+      added += 1;
+    }
+    const stored = insertEventIfMissing(db, {
+      eventId: assignmentEventId(experiment.id, user.id),
+      name: "experiment_assigned",
+      userId: user.id,
+      occurredAt: user.createdAt,
+      recordedAt: now,
+      source: "system",
+      experimentId: experiment.id,
+      variantShown: null,
+      country: user.country,
+      sessionId: null,
+      schemaVersion: SCHEMA_VERSION,
+      props: { variant, allocation_version: experiment.allocationVersion },
+    });
+    if (stored) eventsAdded += 1;
+  }
+  return { added, eventsAdded, ineligible };
 }

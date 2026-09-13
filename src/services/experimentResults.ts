@@ -1,5 +1,6 @@
 import { type ActivationSummary, summarizeActivation } from "@/domain/activation";
 import type { DepositState } from "@/domain/deposit";
+import type { FundingMethod } from "@/domain/fundingMethod";
 import { CONTROL_VARIANT, type Experiment, type Variant, activationWindow } from "@/domain/experiment";
 import { recommendedMethodFor } from "@/domain/recommendation";
 import {
@@ -13,7 +14,7 @@ import {
   twoProportionZTest,
   wilsonCI,
 } from "@/domain/stats";
-import { type Clock, type Duration, type Instant, elapsed, systemClock } from "@/domain/time";
+import { type Clock, type Duration, type Instant, elapsed, inDays, inHours, systemClock } from "@/domain/time";
 import { type Verdict, decideVerdict } from "@/domain/verdict";
 import { type Db, queryAll, queryRow } from "@/infra/db";
 import { listAssignments } from "@/infra/repos/assignments";
@@ -30,8 +31,12 @@ import { type InboxStats, inboxStats } from "@/infra/repos/webhookInbox";
  *   experiment — users with an assignment, grouped by variant
  *   baseline   — users who signed up before the experiment started
  * Deposits come from any source (webhook or historical), so the baseline is
- * measured with exactly the same definition as the experiment. Everything
- * is computed in memory: the whole dataset is a few thousand rows.
+ * measured with exactly the same definition as the experiment.
+ *
+ * How it reads, top to bottom: load everything once → one `UserOutcome` per
+ * user → `aggregate()` any list of outcomes into `GroupStats` → the rest is
+ * slicing (per variant, per country, baseline) and comparing. Everything is
+ * in memory: the whole dataset is a few thousand rows.
  */
 
 export interface GroupStats {
@@ -121,180 +126,171 @@ export interface ResultsOptions {
   clock?: Clock;
 }
 
-const DAY_MS = 86_400_000;
-const HOUR_MS = 3_600_000;
 const SMALL_SAMPLE = 30;
+const LIFTS_TO_TABULATE = [0.03, 0.05, 0.08, 0.1];
 
+/** Everything the read model knows about one user, computed once. */
 interface UserOutcome {
   user: User;
   variant: Variant | null;
   activation: ActivationSummary;
+  /** The earliest credited deposit, if any. */
   firstCredited: DepositState | null;
   usedRecommended: boolean | null;
+  /** Webhook-sourced deposits in a final state, and how many of those failed. */
   webhookFinal: number;
   webhookFailed: number;
 }
 
 export function experimentResults(db: Db, options: ResultsOptions = {}): ExperimentResults {
-  const experimentId = options.experimentId ?? "funding_recommended_v1";
-  const experiment = getExperiment(db, experimentId);
-  if (!experiment) throw new Error(`experiment ${experimentId} not found — run npm run seed`);
-
+  const experiment = getExperiment(db, options.experimentId ?? "funding_recommended_v1");
+  if (!experiment) throw new Error("experiment not found — run npm run seed");
   const asOf = options.asOf ?? (options.clock ?? systemClock).now();
-  const window = activationWindow(experiment);
-  const methods = listFundingMethods(db);
+
   const users = listUsers(db);
   const deposits = listDeposits(db);
-  const assignments = listAssignments(db, experiment.id);
+  const variantByUser = new Map(listAssignments(db, experiment.id).map((a) => [a.userId, a.variant]));
+  const outcomes = outcomesFor(users, deposits, variantByUser, activationWindow(experiment), asOf, listFundingMethods(db));
 
-  const depositsByUser = groupBy(deposits, (d) => d.userId);
-  const variantByUser = new Map(assignments.map((a) => [a.userId, a.variant]));
-  const recommendedByCountry = memo((country: string) => recommendedMethodFor(country, methods).id);
-
-  const outcomes = users.map((user) =>
-    outcomeFor(user, variantByUser.get(user.id) ?? null, depositsByUser.get(user.id) ?? [], window, asOf, recommendedByCountry),
-  );
-  const experimentCohort = outcomes.filter((o) => o.variant !== null);
+  const cohort = outcomes.filter((o) => o.variant !== null);
   const baselineCohort = outcomes.filter((o) => o.user.createdAt < experiment.startsAt);
-
-  // per variant, in allocation order so empty arms still appear
-  const variants: Record<Variant, GroupStats> = {};
-  for (const { variant } of experiment.allocation) {
-    variants[variant] = aggregate(experimentCohort.filter((o) => o.variant === variant));
-  }
 
   const control = CONTROL_VARIANT;
   const treatment = experiment.allocation.map((a) => a.variant).find((v) => v !== control) ?? null;
-  const comparison = treatment === null ? null : compare(control, treatment, variants[control], variants[treatment]);
-
-  const verdict =
-    treatment === null
-      ? null
-      : decideVerdict({
-          control: proportion(variants[control]),
-          treatment: proportion(variants[treatment]),
-          controlLabel: control,
-          treatmentLabel: treatment,
-          pendingWindows: variants[control].pendingWindows + variants[treatment].pendingWindows,
-        });
-
-  const baseline = {
-    ...aggregate(baselineCohort),
-    byCountry: mapValues(groupBy(baselineCohort, (o) => o.user.country), aggregate),
-  };
-
+  const variants = statsByVariant(experiment, cohort);
+  const baseline = { ...aggregate(baselineCohort), byCountry: statsByCountry(baselineCohort) };
   const controlVsBaseline = twoProportionZTest(proportion(baseline), proportion(variants[control]));
-  const sanity = {
-    controlVsBaseline,
-    consistent: controlVsBaseline === null ? null : controlVsBaseline.p >= 0.05,
-  };
-
-  const byCountry: CountryCut[] = [...groupBy(experimentCohort, (o) => o.user.country).entries()]
-    .sort((a, b) => b[1].length - a[1].length)
-    .map(([country, group]) => {
-      const perVariant: Record<Variant, GroupStats> = {};
-      for (const { variant } of experiment.allocation) perVariant[variant] = aggregate(group.filter((o) => o.variant === variant));
-      return {
-        country,
-        variants: perVariant,
-        comparison: treatment === null ? null : compare(control, treatment, perVariant[control], perVariant[treatment]),
-        smallSample: Object.values(perVariant).some((g) => g.users < SMALL_SAMPLE),
-      };
-    });
 
   return {
     experiment,
     asOf,
     dataThrough: inboxStats(db).lastOccurredAt,
     variants,
-    comparison,
-    verdict,
+    comparison: treatment === null ? null : compare(control, treatment, variants),
+    verdict:
+      treatment === null
+        ? null
+        : decideVerdict({
+            control: proportion(variants[control]),
+            treatment: proportion(variants[treatment]),
+            controlLabel: control,
+            treatmentLabel: treatment,
+            pendingWindows: variants[control].pendingWindows + variants[treatment].pendingWindows,
+          }),
     baseline,
-    sanity,
+    sanity: { controlVsBaseline, consistent: controlVsBaseline === null ? null : controlVsBaseline.p >= 0.05 },
     client: clientFunnel(db, experiment),
-    byCountry,
+    byCountry: countryCuts(experiment, cohort, control, treatment),
     dataQuality: dataQuality(db, deposits, users, variantByUser),
-    power: power(variants[control], treatment === null ? null : variants[treatment], baseline, experimentCohort, asOf),
+    power: power(variants[control], treatment === null ? null : variants[treatment], baseline, cohort, asOf),
   };
 }
 
 // ---- per user -------------------------------------------------------------
 
-function outcomeFor(
-  user: User,
-  variant: Variant | null,
+function outcomesFor(
+  users: User[],
   deposits: DepositRecord[],
+  variantByUser: Map<string, Variant>,
   window: Duration,
   asOf: Instant,
-  recommendedByCountry: (country: string) => string,
-): UserOutcome {
-  const activation = summarizeActivation(user.createdAt, deposits, window, asOf);
-  const credited = deposits
-    .filter((d) => d.status === "completed" && d.completedAt !== null)
-    .sort((a, b) => (a.completedAt as number) - (b.completedAt as number));
-  const firstCredited = credited[0] ?? null;
-  const webhook = deposits.filter((d) => d.source === "webhook");
-  return {
-    user,
-    variant,
-    activation,
-    firstCredited,
-    usedRecommended: firstCredited === null ? null : firstCredited.methodId === recommendedByCountry(user.country),
-    webhookFinal: webhook.filter((d) => d.status !== "received").length,
-    webhookFailed: webhook.filter((d) => d.status === "failed").length,
-  };
+  methods: FundingMethod[],
+): UserOutcome[] {
+  const depositsByUser = Map.groupBy(deposits, (d) => d.userId);
+  const recommendedByCountry = new Map(
+    [...new Set(users.map((u) => u.country))].map((c) => [c, recommendedMethodFor(c, methods).id]),
+  );
+
+  return users.map((user) => {
+    const own = depositsByUser.get(user.id) ?? [];
+    const credited = own.filter((d) => d.status === "completed").toSorted((a, b) => (a.completedAt ?? 0) - (b.completedAt ?? 0));
+    const firstCredited = credited[0] ?? null;
+    const webhookFinal = own.filter((d) => d.source === "webhook" && d.status !== "received");
+    return {
+      user,
+      variant: variantByUser.get(user.id) ?? null,
+      activation: summarizeActivation(user.createdAt, own, window, asOf),
+      firstCredited,
+      usedRecommended: firstCredited && firstCredited.methodId === recommendedByCountry.get(user.country),
+      webhookFinal: webhookFinal.length,
+      webhookFailed: webhookFinal.filter((d) => d.status === "failed").length,
+    };
+  });
 }
 
 // ---- per group ------------------------------------------------------------
 
+/** Any list of outcomes → the numbers a table row needs. Used for variants, countries and the baseline alike. */
 function aggregate(group: UserOutcome[]): GroupStats {
+  const count = (pick: (o: UserOutcome) => boolean) => group.filter(pick).length;
   const users = group.length;
-  const activated = group.filter((o) => o.activation.activated).length;
+  const activated = count((o) => o.activation.activated);
   const converted = group.filter((o) => o.firstCredited !== null);
-  const webhookFinal = sum(group, (o) => o.webhookFinal);
-  const webhookFailed = sum(group, (o) => o.webhookFailed);
   const withRecommendation = converted.filter((o) => o.usedRecommended !== null);
+  const webhookFinal = group.reduce((n, o) => n + o.webhookFinal, 0);
+  const webhookFailed = group.reduce((n, o) => n + o.webhookFailed, 0);
+
+  const daysToInitiate = converted.flatMap((o) =>
+    o.activation.firstInitiatedAt === null ? [] : [inDays(elapsed(o.user.createdAt, o.activation.firstInitiatedAt))],
+  );
+  const hoursToCredit = converted.flatMap((o) => {
+    const d = o.firstCredited;
+    return d?.initiatedAt == null || d.completedAt == null ? [] : [inHours(elapsed(d.initiatedAt, d.completedAt))];
+  });
 
   return {
     users,
     activated,
     rate: users === 0 ? null : activated / users,
     rateCI95: wilsonCI({ k: activated, n: users }),
-    initiatedInWindow: group.filter((o) => o.activation.initiatedInWindow).length,
+    initiatedInWindow: count((o) => o.activation.initiatedInWindow),
     everConverted: converted.length,
-    lateConversions: group.filter((o) => o.activation.lateConversion).length,
-    pendingWindows: group.filter((o) => !o.activation.windowClosed).length,
-    medianDaysToInitiate: median(
-      converted
-        .filter((o) => o.activation.firstInitiatedAt !== null)
-        .map((o) => elapsed(o.user.createdAt, o.activation.firstInitiatedAt as Instant) / DAY_MS),
-    ),
-    medianHoursToCredit: median(
-      converted
-        .filter((o) => o.firstCredited?.initiatedAt != null && o.firstCredited.completedAt != null)
-        .map((o) => elapsed(o.firstCredited!.initiatedAt as Instant, o.firstCredited!.completedAt as Instant) / HOUR_MS),
-    ),
+    lateConversions: count((o) => o.activation.lateConversion),
+    pendingWindows: count((o) => !o.activation.windowClosed),
+    medianDaysToInitiate: median(daysToInitiate),
+    medianHoursToCredit: median(hoursToCredit),
     usedRecommended:
-      withRecommendation.length === 0
-        ? null
-        : { k: withRecommendation.filter((o) => o.usedRecommended).length, n: withRecommendation.length },
+      withRecommendation.length === 0 ? null : { k: withRecommendation.filter((o) => o.usedRecommended).length, n: withRecommendation.length },
     failureRate: webhookFinal === 0 ? null : { k: webhookFailed, n: webhookFinal },
-    medianFirstDepositUsd: median(converted.map((o) => o.firstCredited!.amountUsd)),
+    medianFirstDepositUsd: median(converted.map((o) => o.firstCredited?.amountUsd ?? 0)),
   };
 }
 
 const proportion = (g: GroupStats): Proportion => ({ k: g.activated, n: g.users });
 
-function compare(control: Variant, treatment: Variant, c: GroupStats, t: GroupStats): Comparison {
-  const pc = proportion(c);
-  const pt = proportion(t);
+/** In allocation order, so an empty arm still shows up as a row. */
+function statsByVariant(experiment: Experiment, group: UserOutcome[]): Record<Variant, GroupStats> {
+  return Object.fromEntries(experiment.allocation.map(({ variant }) => [variant, aggregate(group.filter((o) => o.variant === variant))]));
+}
+
+function statsByCountry(group: UserOutcome[]): Record<string, GroupStats> {
+  return Object.fromEntries([...Map.groupBy(group, (o) => o.user.country)].map(([country, g]) => [country, aggregate(g)]));
+}
+
+function compare(control: Variant, treatment: Variant, stats: Record<Variant, GroupStats>): Comparison {
+  const c = stats[control];
+  const t = stats[treatment];
   return {
     control,
     treatment,
     difference: c.rate === null || t.rate === null ? null : t.rate - c.rate,
-    differenceCI95: differenceCI(pc, pt),
-    test: twoProportionZTest(pc, pt),
+    differenceCI95: differenceCI(proportion(c), proportion(t)),
+    test: twoProportionZTest(proportion(c), proportion(t)),
   };
+}
+
+function countryCuts(experiment: Experiment, cohort: UserOutcome[], control: Variant, treatment: Variant | null): CountryCut[] {
+  return [...Map.groupBy(cohort, (o) => o.user.country)]
+    .toSorted((a, b) => b[1].length - a[1].length)
+    .map(([country, group]) => {
+      const variants = statsByVariant(experiment, group);
+      return {
+        country,
+        variants,
+        comparison: treatment === null ? null : compare(control, treatment, variants),
+        smallSample: Object.values(variants).some((g) => g.users < SMALL_SAMPLE),
+      };
+    });
 }
 
 // ---- client-side funnel (events written by the funding screen) -----------
@@ -303,7 +299,7 @@ function clientFunnel(db: Db, experiment: Experiment): ClientFunnelStats | null 
   const total = queryRow<{ n: number }>(db, "SELECT COUNT(*) AS n FROM events WHERE source = 'client' AND experiment_id = ?", experiment.id).n;
   if (total === 0) return null;
 
-  const distinct = (name: string, extra = "") =>
+  const usersByVariant = (name: string, extra = "") =>
     Object.fromEntries(
       queryAll<{ variant_shown: string; n: number }>(
         db,
@@ -316,10 +312,10 @@ function clientFunnel(db: Db, experiment: Experiment): ClientFunnelStats | null 
     );
 
   return {
-    exposed: distinct("funding_screen_viewed"),
-    expanded: distinct("funding_options_expanded"),
-    selected: distinct("funding_method_selected"),
-    selectedRecommended: distinct("funding_method_selected", "AND json_extract(props, '$.is_recommended') = 1"),
+    exposed: usersByVariant("funding_screen_viewed"),
+    expanded: usersByVariant("funding_options_expanded"),
+    selected: usersByVariant("funding_method_selected"),
+    selectedRecommended: usersByVariant("funding_method_selected", "AND json_extract(props, '$.is_recommended') = 1"),
   };
 }
 
@@ -328,14 +324,21 @@ function clientFunnel(db: Db, experiment: Experiment): ClientFunnelStats | null 
 function dataQuality(db: Db, deposits: DepositRecord[], users: User[], variantByUser: Map<string, Variant>): DataQuality {
   const inbox = inboxStats(db);
   const webhook = deposits.filter((d) => d.source === "webhook");
-  const count = (status: DepositRecord["status"]) => webhook.filter((d) => d.status === status).length;
+  const byStatus = Object.groupBy(webhook, (d) => d.status);
   const known = new Set(users.map((u) => u.id));
+  const depositors = new Set(webhook.map((d) => d.userId));
   return {
     inbox,
     duplicatesIgnored: inbox.deliveries - inbox.uniqueEvents,
-    deposits: { total: webhook.length, completed: count("completed"), failed: count("failed"), conflict: count("conflict"), received: count("received") },
-    unknownUsers: new Set(webhook.filter((d) => !known.has(d.userId)).map((d) => d.userId)).size,
-    assignmentsMissingForDepositors: new Set(webhook.filter((d) => known.has(d.userId) && !variantByUser.has(d.userId)).map((d) => d.userId)).size,
+    deposits: {
+      total: webhook.length,
+      completed: byStatus.completed?.length ?? 0,
+      failed: byStatus.failed?.length ?? 0,
+      conflict: byStatus.conflict?.length ?? 0,
+      received: byStatus.received?.length ?? 0,
+    },
+    unknownUsers: depositors.difference(known).size,
+    assignmentsMissingForDepositors: depositors.intersection(known).difference(new Set(variantByUser.keys())).size,
   };
 }
 
@@ -343,60 +346,28 @@ function dataQuality(db: Db, deposits: DepositRecord[], users: User[], variantBy
 
 function power(control: GroupStats, treatment: GroupStats | null, baseline: GroupStats, cohort: UserOutcome[], asOf: Instant): PowerAnalysis {
   const baseRate = control.rate ?? baseline.rate;
-  const nControl = control.users;
-  const nTreatment = treatment?.users ?? 0;
 
+  // Signup pace: cohort size over the span between its first and last signup.
   let signupsPerMonthObserved: number | null = null;
   if (cohort.length > 1) {
     const signups = cohort.map((o) => o.user.createdAt);
-    const spanDays = Math.max(1, elapsed(Math.min(...signups) as Instant, Math.min(asOf, Math.max(...signups)) as Instant) / DAY_MS);
-    signupsPerMonthObserved = (cohort.length / spanDays) * 30;
+    const first = Math.min(...signups) as Instant;
+    const last = Math.min(asOf, Math.max(...signups)) as Instant;
+    signupsPerMonthObserved = (cohort.length / Math.max(1, inDays(elapsed(first, last)))) * 30;
   }
 
-  const table = [0.03, 0.05, 0.08, 0.1].map((lift) => {
+  const table = LIFTS_TO_TABULATE.map((lift) => {
     const perArm = baseRate === null ? null : requiredPerArm(baseRate, baseRate + lift);
     const usersNeeded = perArm === null ? null : perArm * 2;
-    return {
-      lift,
-      usersNeeded,
-      months: usersNeeded === null || signupsPerMonthObserved === null ? null : usersNeeded / signupsPerMonthObserved,
-    };
+    const months = usersNeeded === null || signupsPerMonthObserved === null ? null : usersNeeded / signupsPerMonthObserved;
+    return { lift, usersNeeded, months };
   });
 
   return {
     baseRate,
-    mde: baseRate === null ? null : minDetectableEffect(baseRate, nControl, nTreatment),
+    mde: baseRate === null ? null : minDetectableEffect(baseRate, control.users, treatment?.users ?? 0),
     probabilityTreatmentBeatsControl: treatment === null ? null : probabilityTreatmentBeats(proportion(control), proportion(treatment)),
     signupsPerMonthObserved,
     table,
   };
-}
-
-// ---- small helpers --------------------------------------------------------
-
-function groupBy<T, K>(items: T[], key: (item: T) => K): Map<K, T[]> {
-  const map = new Map<K, T[]>();
-  for (const item of items) {
-    const k = key(item);
-    const bucket = map.get(k);
-    if (bucket) bucket.push(item);
-    else map.set(k, [item]);
-  }
-  return map;
-}
-
-function mapValues<V, R>(map: Map<string, V>, fn: (v: V) => R): Record<string, R> {
-  return Object.fromEntries([...map.entries()].map(([k, v]) => [k, fn(v)]));
-}
-
-function memo<A extends string, R>(fn: (a: A) => R): (a: A) => R {
-  const cache = new Map<A, R>();
-  return (a) => {
-    if (!cache.has(a)) cache.set(a, fn(a));
-    return cache.get(a) as R;
-  };
-}
-
-function sum<T>(items: T[], pick: (item: T) => number): number {
-  return items.reduce((acc, item) => acc + pick(item), 0);
 }

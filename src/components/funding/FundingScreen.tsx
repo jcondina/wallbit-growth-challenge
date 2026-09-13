@@ -44,11 +44,8 @@ export function FundingScreen(props: FundingScreenProps) {
   );
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const viewedAt = useRef<number>(0);
-  const selectedAt = useRef<number>(0);
-  const selections = useRef(0);
-  const lastStep = useRef<"viewed" | "selected" | "copied">("viewed");
-  const viewedSent = useRef(false);
+  // What this user has done on this render of the screen; feeds the tracked durations and last_step.
+  const journey = useRef({ viewedAt: 0, selectedAt: 0, selections: 0, lastStep: "viewed" as "viewed" | "selected" | "copied", exposureSent: false });
 
   const displayOrder = useMemo(
     () => (isB ? [recommended, ...methods.filter((m) => m.id !== recommended.id)] : methods),
@@ -57,9 +54,10 @@ export function FundingScreen(props: FundingScreenProps) {
 
   useEffect(() => {
     // Exposure, once per mount even under StrictMode's double effect.
-    if (!viewedSent.current) {
-      viewedSent.current = true;
-      viewedAt.current = nowMs();
+    const j = journey.current;
+    if (!j.exposureSent) {
+      j.exposureSent = true;
+      j.viewedAt = nowMs();
       track(ctx, "funding_screen_viewed", {
         methods_shown: displayOrder.map((m) => m.id),
         recommended_method_id: isB ? recommended.id : null,
@@ -68,44 +66,35 @@ export function FundingScreen(props: FundingScreenProps) {
       });
     }
     // Best-effort abandonment signal; sendBeacon survives the unload.
-    const onLeave = () =>
-      track(ctx, "funding_screen_left", {
-        ms_on_screen: msSince(viewedAt.current),
-        last_step: lastStep.current,
-      });
+    const onLeave = () => track(ctx, "funding_screen_left", { ms_on_screen: msSince(j.viewedAt), last_step: j.lastStep });
     window.addEventListener("pagehide", onLeave);
     return () => window.removeEventListener("pagehide", onLeave);
   }, [ctx, displayOrder, isB, recommended.id]);
 
   const select = (method: MethodView, via: "list" | "primary" | "expanded") => {
-    const position = displayOrder.findIndex((m) => m.id === method.id);
+    const j = journey.current;
     track(ctx, "funding_method_selected", {
       method_id: method.id,
-      position,
+      position: displayOrder.findIndex((m) => m.id === method.id),
       is_recommended: isB && method.id === recommended.id,
       via,
-      ms_since_view: msSince(viewedAt.current),
-      n_selected_before: selections.current,
+      ms_since_view: msSince(j.viewedAt),
+      n_selected_before: j.selections,
     });
-    selections.current += 1;
-    selectedAt.current = nowMs();
-    lastStep.current = "selected";
+    j.selections += 1;
+    j.selectedAt = nowMs();
+    j.lastStep = "selected";
     setSelectedId(method.id);
   };
 
   const copy = (method: MethodView) => (field: string) => {
-    track(ctx, "funding_details_copied", {
-      method_id: method.id,
-      field,
-      ms_since_select: msSince(selectedAt.current),
-    });
-    lastStep.current = "copied";
+    const j = journey.current;
+    track(ctx, "funding_details_copied", { method_id: method.id, field, ms_since_select: msSince(j.selectedAt) });
+    j.lastStep = "copied";
   };
 
   const onOptionsToggle = (e: SyntheticEvent<HTMLDetailsElement>) => {
-    if (e.currentTarget.open) {
-      track(ctx, "funding_options_expanded", { ms_since_view: msSince(viewedAt.current) });
-    }
+    if (e.currentTarget.open) track(ctx, "funding_options_expanded", { ms_since_view: msSince(journey.current.viewedAt) });
   };
 
   const card = (method: MethodView, emphasis: "hero" | "list", via: "list" | "primary" | "expanded") => (

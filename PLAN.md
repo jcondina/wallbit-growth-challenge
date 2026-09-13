@@ -940,6 +940,19 @@ legitimately grows with every replay; it now reports deliveries as
 "N pasadas completas" and only fails when the count is not a whole number of
 passes. `ENTREGA.md › Tiempo` carries a TODO for the human's own hours.
 
+**Simplification pass** (after Phase 7). Same behavior, guarded by the 142
+tests: `parseInstant` now leans on `Date.parse` (TZ-independent with an
+explicit zone) and keeps only the checks it is lenient about (field ranges
+in the regex, calendar-day overflow); `funnel.ts` sorts once and folds each
+user's events with `Map.groupBy` / `Object.groupBy`, so "first" is `[0]` and
+"last" is `.at(-1)`; `experimentResults.ts` lost its hand-rolled `groupBy /
+mapValues / memo / sum` in favor of `Map.groupBy`, `Object.groupBy`,
+`toSorted` and `Set.difference / intersection`, and its orchestrator is a
+list of named steps (`outcomesFor → aggregate → statsByVariant /
+statsByCountry → compare → countryCuts`); `seed.ts` is four named steps;
+`FundingScreen` keeps one `journey` ref instead of five. All of these APIs
+are native in Node ≥ 22 (the `engines` floor).
+
 ---
 
 ## 16. `ENTREGA.md` outline (Spanish, brief; half a page honest beats three pages)

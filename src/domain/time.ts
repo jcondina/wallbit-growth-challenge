@@ -24,50 +24,27 @@ export class InvalidInstant extends Error {
 
 // YYYY-MM-DDTHH:MM:SS[.sss](Z|±HH:MM). A time zone designator is mandatory:
 // a naive timestamp has no single meaning and is rejected rather than guessed.
+// Field ranges are enforced here because Date.parse is lenient about them
+// (it accepts 24:00:00 and rolls February 30 into March).
 const ISO_WITH_ZONE =
-  /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.(\d{1,3}))?(Z|[+-]\d{2}:\d{2})$/;
+  /^(\d{4})-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])T([01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d{1,3})?(?:Z|[+-](?:[01]\d|2[0-3]):[0-5]\d)$/;
 
 /** The only door in. Accepts `…Z` or an explicit `±HH:MM` offset; throws on anything else. */
 export function parseInstant(raw: unknown): Instant {
   if (typeof raw !== "string") throw new InvalidInstant(raw);
-  const m = ISO_WITH_ZONE.exec(raw);
-  if (!m) throw new InvalidInstant(raw);
+  const match = ISO_WITH_ZONE.exec(raw);
+  if (!match) throw new InvalidInstant(raw);
 
-  const [, y, mo, d, h, mi, s, frac, zone] = m;
-  const year = Number(y);
-  const month = Number(mo);
-  const day = Number(d);
-  const hour = Number(h);
-  const minute = Number(mi);
-  const second = Number(s);
-  const millis = frac === undefined ? 0 : Number(frac.padEnd(3, "0"));
+  // With an explicit zone, Date.parse is unambiguous and ignores the
+  // process time zone (the ES date-time string format); it also applies the
+  // offset for us. What it will not do is reject a day that only exists by
+  // overflow, so the calendar day is checked separately.
+  const [, year, month, day] = match.map(Number);
+  if (new Date(Date.UTC(year, month - 1, day)).getUTCDate() !== day) throw new InvalidInstant(raw);
 
-  if (month < 1 || month > 12 || day < 1 || day > 31) throw new InvalidInstant(raw);
-  if (hour > 23 || minute > 59 || second > 59) throw new InvalidInstant(raw);
-
-  // Date.UTC never consults the process time zone. Round-trip the calendar
-  // fields to reject dates that only "exist" by overflow (e.g. February 30).
-  const utc = Date.UTC(year, month - 1, day, hour, minute, second, millis);
-  const check = new Date(utc);
-  if (
-    check.getUTCFullYear() !== year ||
-    check.getUTCMonth() !== month - 1 ||
-    check.getUTCDate() !== day
-  ) {
-    throw new InvalidInstant(raw);
-  }
-
-  let offsetMs = 0;
-  if (zone !== "Z") {
-    const sign = zone.startsWith("-") ? -1 : 1;
-    const offH = Number(zone.slice(1, 3));
-    const offM = Number(zone.slice(4, 6));
-    if (offH > 23 || offM > 59) throw new InvalidInstant(raw);
-    offsetMs = sign * (offH * 60 + offM) * 60_000;
-  }
-
-  // "17:22:31+03:00" is 14:22:31Z — local wall time minus the offset.
-  return (utc - offsetMs) as Instant;
+  const epochMs = Date.parse(raw);
+  if (Number.isNaN(epochMs)) throw new InvalidInstant(raw);
+  return epochMs as Instant;
 }
 
 /** Brands an integer that is already known to be epoch milliseconds (rows read from the database, test fixtures). */
@@ -97,6 +74,10 @@ export function days(n: number): Duration {
 export function elapsed(from: Instant, to: Instant): Duration {
   return (to - from) as Duration;
 }
+
+/** Durations as plain numbers, for medians and display. */
+export const inHours = (d: Duration): number => d / 3_600_000;
+export const inDays = (d: Duration): number => d / 86_400_000;
 
 export function plus(i: Instant, d: Duration): Instant {
   return (i + d) as Instant;

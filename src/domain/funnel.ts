@@ -11,9 +11,10 @@ import type { Instant } from "./time";
  * the webhook-derived events. A user's funnel variant is what the screen
  * showed at first exposure, which is what they actually experienced.
  *
- * Every computation here is order-independent: events are grouped per user
- * first and folded with min/max/sets, so delivery order cannot change a
- * count.
+ * How it reads: events are sorted once, grouped per user, and each user's
+ * events are folded into a `UserTrail` (what they did, in order). Every
+ * number on the page is a count or a median over trails, so delivery order
+ * cannot change a result.
  */
 
 export interface FunnelEvent {
@@ -83,15 +84,17 @@ export interface FunnelSummary {
   friction: FrictionSignals;
 }
 
+type LastStep = "viewed" | "selected" | "copied";
+
+/** One user's journey, every list in chronological order. */
 interface UserTrail {
   variant: Variant;
   views: number;
-  firstViewAt: Instant;
-  selected: { methodId: string; at: Instant; recommended: boolean; msSinceView: number }[];
-  copied: { methodId: string; at: Instant; msSinceSelect: number }[];
+  selected: { methodId: string; recommended: boolean; msSinceView: number }[];
+  copied: { methodId: string; msSinceSelect: number }[];
   expanded: boolean;
-  lastLeft: { at: Instant; lastStep: "viewed" | "selected" | "copied" } | null;
-  received: { methodId: string; at: Instant }[];
+  lastLeft: LastStep | null;
+  received: { methodId: string }[];
   completed: { methodId: string }[];
   failed: { methodId: string }[];
 }
@@ -101,110 +104,91 @@ export function computeFunnel(
   variantByUser: Map<string, Variant>,
   variants: Variant[],
 ): FunnelSummary {
-  const trails = buildTrails(events, variantByUser);
-  const exposed = [...trails.values()].filter((t) => t.views > 0);
+  const chronological = events.toSorted((a, b) => a.occurredAt - b.occurredAt || a.name.localeCompare(b.name));
 
-  const byVariant = variants.map((variant) => variantFunnel(variant, exposed.filter((t) => t.variant === variant)));
-  const byMethod = methodFunnels(exposed);
-  const friction = frictionSignals(trails, exposed);
+  const trails: UserTrail[] = [];
+  for (const [userId, userEvents] of Map.groupBy(chronological, (e) => e.userId)) {
+    const assigned = variantByUser.get(userId);
+    if (assigned !== undefined) trails.push(trailFor(userEvents, assigned)); // not enrolled → not in the funnel
+  }
+  const exposed = trails.filter((t) => t.views > 0);
 
-  return { exposedUsers: exposed.length, byVariant, byMethod, friction };
+  return {
+    exposedUsers: exposed.length,
+    byVariant: variants.map((variant) => variantFunnel(variant, exposed.filter((t) => t.variant === variant))),
+    byMethod: methodFunnels(exposed),
+    friction: frictionSignals(trails, exposed),
+  };
 }
 
-// ---- trails ----------------------------------------------------------------
+// ---- one user ---------------------------------------------------------------
 
-function buildTrails(events: FunnelEvent[], variantByUser: Map<string, Variant>): Map<string, UserTrail> {
-  const trails = new Map<string, UserTrail>();
-  const str = (v: unknown) => (typeof v === "string" ? v : "");
-  const num = (v: unknown) => (typeof v === "number" ? v : 0);
+const str = (v: unknown) => (typeof v === "string" ? v : "");
+const num = (v: unknown) => (typeof v === "number" ? v : 0);
+const method = (e: FunnelEvent) => ({ methodId: str(e.props.method_id) });
 
-  for (const e of events) {
-    const assigned = variantByUser.get(e.userId);
-    if (assigned === undefined) continue; // not enrolled → not in the experiment funnel
-
-    let t = trails.get(e.userId);
-    if (!t) {
-      t = { variant: assigned, views: 0, firstViewAt: e.occurredAt, selected: [], copied: [], expanded: false, lastLeft: null, received: [], completed: [], failed: [] };
-      trails.set(e.userId, t);
-    }
-
-    switch (e.name) {
-      case "funding_screen_viewed":
-        if (t.views === 0 || e.occurredAt < t.firstViewAt) {
-          t.firstViewAt = e.occurredAt;
-          if (e.variantShown) t.variant = e.variantShown; // what they saw first
-        }
-        t.views += 1;
-        break;
-      case "funding_method_selected":
-        t.selected.push({ methodId: str(e.props.method_id), at: e.occurredAt, recommended: e.props.is_recommended === true, msSinceView: num(e.props.ms_since_view) });
-        break;
-      case "funding_details_copied":
-        t.copied.push({ methodId: str(e.props.method_id), at: e.occurredAt, msSinceSelect: num(e.props.ms_since_select) });
-        break;
-      case "funding_options_expanded":
-        t.expanded = true;
-        break;
-      case "funding_screen_left": {
-        const lastStep = str(e.props.last_step) as "viewed" | "selected" | "copied";
-        if (!t.lastLeft || e.occurredAt > t.lastLeft.at) t.lastLeft = { at: e.occurredAt, lastStep };
-        break;
-      }
-      case "deposit_received":
-        t.received.push({ methodId: str(e.props.method_id), at: e.occurredAt });
-        break;
-      case "deposit_completed":
-        t.completed.push({ methodId: str(e.props.method_id) });
-        break;
-      case "deposit_failed":
-        t.failed.push({ methodId: str(e.props.method_id) });
-        break;
-      default:
-        break;
-    }
-  }
-  return trails;
+function trailFor(events: FunnelEvent[], assigned: Variant): UserTrail {
+  const by = Object.groupBy(events, (e) => e.name);
+  const views = by.funding_screen_viewed ?? [];
+  return {
+    variant: views[0]?.variantShown ?? assigned,
+    views: views.length,
+    selected: (by.funding_method_selected ?? []).map((e) => ({
+      methodId: str(e.props.method_id),
+      recommended: e.props.is_recommended === true,
+      msSinceView: num(e.props.ms_since_view),
+    })),
+    copied: (by.funding_details_copied ?? []).map((e) => ({
+      methodId: str(e.props.method_id),
+      msSinceSelect: num(e.props.ms_since_select),
+    })),
+    expanded: (by.funding_options_expanded ?? []).length > 0,
+    lastLeft: (str(by.funding_screen_left?.at(-1)?.props.last_step) || null) as LastStep | null,
+    received: (by.deposit_received ?? []).map(method),
+    completed: (by.deposit_completed ?? []).map(method),
+    failed: (by.deposit_failed ?? []).map(method),
+  };
 }
 
 // ---- per variant -----------------------------------------------------------
 
 function variantFunnel(variant: Variant, trails: UserTrail[]): VariantFunnel {
+  const count = (pick: (t: UserTrail) => boolean) => trails.filter(pick).length;
   const steps: StepCounts = {
     viewed: trails.length,
-    selected: trails.filter((t) => t.selected.length > 0).length,
-    copied: trails.filter((t) => t.copied.length > 0).length,
-    received: trails.filter((t) => t.received.length > 0).length,
-    completed: trails.filter((t) => t.completed.length > 0).length,
-    failed: trails.filter((t) => t.failed.length > 0).length,
-  };
-  const conv = (from: number, to: number) => (from === 0 ? null : to / from);
-  const conversion = {
-    selected: conv(steps.viewed, steps.selected),
-    copied: conv(steps.selected, steps.copied),
-    received: conv(steps.copied, steps.received),
-    completed: conv(steps.received, steps.completed),
+    selected: count((t) => t.selected.length > 0),
+    copied: count((t) => t.copied.length > 0),
+    received: count((t) => t.received.length > 0),
+    completed: count((t) => t.completed.length > 0),
+    failed: count((t) => t.failed.length > 0),
   };
 
-  let largestDrop: Drop | null = null;
+  const ratio = (from: number, to: number) => (from === 0 ? null : to / from);
+  const conversion = {
+    selected: ratio(steps.viewed, steps.selected),
+    copied: ratio(steps.selected, steps.copied),
+    received: ratio(steps.copied, steps.received),
+    completed: ratio(steps.received, steps.completed),
+  };
+
+  const drops: Drop[] = [];
   for (let i = 1; i < STEPS.length; i++) {
-    const from = STEPS[i - 1];
-    const to = STEPS[i];
-    if (steps[from] === 0) continue;
-    const lost = steps[from] - steps[to];
-    const rate = lost / steps[from];
-    if (lost > 0 && (largestDrop === null || rate > largestDrop.rate)) largestDrop = { from, to, users: lost, rate };
+    const [from, to] = [STEPS[i - 1], STEPS[i]];
+    const users = steps[from] - steps[to];
+    if (steps[from] > 0 && users > 0) drops.push({ from, to, users, rate: users / steps[from] });
   }
 
-  const firstSelection = (t: UserTrail) => [...t.selected].sort((a, b) => a.at - b.at)[0];
+  const withSelection = trails.filter((t) => t.selected.length > 0);
+  const withCopy = trails.filter((t) => t.copied.length > 0);
   return {
     variant,
     steps,
     conversion,
-    largestDrop,
-    medianMsToSelect: median(trails.filter((t) => t.selected.length > 0).map((t) => firstSelection(t).msSinceView)),
-    medianMsToCopy: median(trails.filter((t) => t.copied.length > 0).map((t) => [...t.copied].sort((a, b) => a.at - b.at)[0].msSinceSelect)),
-    expanded: trails.filter((t) => t.expanded).length,
-    selectedRecommendedFirst: trails.filter((t) => t.selected.length > 0 && firstSelection(t).recommended).length,
+    largestDrop: drops.toSorted((a, b) => b.rate - a.rate)[0] ?? null,
+    medianMsToSelect: median(withSelection.map((t) => t.selected[0].msSinceView)),
+    medianMsToCopy: median(withCopy.map((t) => t.copied[0].msSinceSelect)),
+    expanded: count((t) => t.expanded),
+    selectedRecommendedFirst: withSelection.filter((t) => t.selected[0].recommended).length,
   };
 }
 
@@ -213,28 +197,24 @@ function variantFunnel(variant: Variant, trails: UserTrail[]): VariantFunnel {
 function methodFunnels(trails: UserTrail[]): MethodFunnel[] {
   const rows = new Map<string, MethodFunnel>();
   const row = (id: string) => {
-    let r = rows.get(id);
-    if (!r) {
-      r = { methodId: id, selected: 0, copied: 0, received: 0, completed: 0, failed: 0 };
-      rows.set(id, r);
-    }
-    return r;
+    if (!rows.has(id)) rows.set(id, { methodId: id, selected: 0, copied: 0, received: 0, completed: 0, failed: 0 });
+    return rows.get(id) as MethodFunnel;
   };
-  const uniqueIds = (items: { methodId: string }[]) => new Set(items.map((i) => i.methodId));
+  const distinctIds = (items: { methodId: string }[]) => new Set(items.map((i) => i.methodId));
 
   for (const t of trails) {
-    for (const id of uniqueIds(t.selected)) row(id).selected += 1;
-    for (const id of uniqueIds(t.copied)) row(id).copied += 1;
-    for (const id of uniqueIds(t.received)) row(id).received += 1;
-    for (const id of uniqueIds(t.completed)) row(id).completed += 1;
-    for (const id of uniqueIds(t.failed)) row(id).failed += 1;
+    for (const id of distinctIds(t.selected)) row(id).selected += 1;
+    for (const id of distinctIds(t.copied)) row(id).copied += 1;
+    for (const id of distinctIds(t.received)) row(id).received += 1;
+    for (const id of distinctIds(t.completed)) row(id).completed += 1;
+    for (const id of distinctIds(t.failed)) row(id).failed += 1;
   }
-  return [...rows.values()].sort((a, b) => b.selected - a.selected || a.methodId.localeCompare(b.methodId));
+  return [...rows.values()].toSorted((a, b) => b.selected - a.selected || a.methodId.localeCompare(b.methodId));
 }
 
 // ---- friction --------------------------------------------------------------
 
-function frictionSignals(all: Map<string, UserTrail>, exposed: UserTrail[]): FrictionSignals {
+function frictionSignals(all: UserTrail[], exposed: UserTrail[]): FrictionSignals {
   const indecision = { one: 0, two: 0, threePlus: 0 };
   for (const t of exposed) {
     const distinct = new Set(t.selected.map((s) => s.methodId)).size;
@@ -244,20 +224,15 @@ function frictionSignals(all: Map<string, UserTrail>, exposed: UserTrail[]): Fri
   }
 
   const abandonedAt = { viewed: 0, selected: 0, copied: 0 };
-  for (const t of exposed) if (t.lastLeft) abandonedAt[t.lastLeft.lastStep] += 1;
-
-  const selectedNotDeposited = exposed.filter((t) => {
-    if (t.selected.length === 0 || t.received.length === 0) return false;
-    const lastSelected = [...t.selected].sort((a, b) => b.at - a.at)[0].methodId;
-    const firstReceived = [...t.received].sort((a, b) => a.at - b.at)[0].methodId;
-    return lastSelected !== firstReceived;
-  }).length;
+  for (const t of exposed) if (t.lastLeft) abandonedAt[t.lastLeft] += 1;
 
   return {
     indecision,
     loopers: exposed.filter((t) => t.views >= 2 && t.received.length === 0).length,
     abandonedAt,
-    selectedNotDeposited,
-    unexposedDepositors: [...all.values()].filter((t) => t.views === 0 && t.received.length > 0).length,
+    selectedNotDeposited: exposed.filter(
+      (t) => t.selected.length > 0 && t.received.length > 0 && t.selected.at(-1)?.methodId !== t.received[0].methodId,
+    ).length,
+    unexposedDepositors: all.filter((t) => t.views === 0 && t.received.length > 0).length,
   };
 }

@@ -10,7 +10,7 @@ import { FUNDING_EXPERIMENT, isEligible } from "@/domain/experiment";
 import { getDb } from "@/infra/db";
 import { getAssignment } from "@/infra/repos/assignments";
 import { getExperiment } from "@/infra/repos/experiments";
-import { type User, listUsers } from "@/infra/repos/users";
+import { listUsers } from "@/infra/repos/users";
 import { formatUtc } from "@/lib/format";
 
 // Dev index: one sample user per country plus one pre-experiment user, so
@@ -31,12 +31,11 @@ export default async function Home() {
     );
   }
 
-  const firstPerCountry = new Map<string, User>();
-  for (const u of users) {
-    if (isEligible(experiment, u) && !firstPerCountry.has(u.country)) firstPerCountry.set(u.country, u);
-  }
+  // users come ordered by signup, so the first of each country group is the earliest eligible signup there
+  const eligible = users.filter((u) => isEligible(experiment, u));
+  const firstPerCountry = [...Map.groupBy(eligible, (u) => u.country).values()].map((group) => group[0]);
   const preExperiment = users.find((u) => !isEligible(experiment, u));
-  const samples = [...firstPerCountry.values(), ...(preExperiment ? [preExperiment] : [])];
+  const samples = [...firstPerCountry, ...(preExperiment ? [preExperiment] : [])];
 
   const link = (href: string, label: string) => (
     <Link href={href} prefetch={false} className="underline">

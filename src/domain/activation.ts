@@ -65,7 +65,6 @@ export function summarizeActivation(
 }
 
 function earliest(values: (Instant | null)[]): Instant | null {
-  let min: Instant | null = null;
-  for (const v of values) if (v !== null && (min === null || v < min)) min = v;
-  return min;
+  const known = values.filter((v): v is Instant => v !== null);
+  return known.length === 0 ? null : (Math.min(...known) as Instant);
 }
