@@ -11,5 +11,9 @@ export default defineConfig({
   test: {
     environment: "node",
     include: ["tests/**/*.test.ts"],
+    // Persist TypeScript → JS transforms in node_modules/.vitest-cache
+    // (keyed by content hash, so edits invalidate themselves). Without it
+    // every run re-transforms src/ from scratch: ~40 % of the run.
+    fsModuleCache: true,
   },
 });
