@@ -10,10 +10,11 @@ interface Props {
   asOf: Instant;
   windowsClosed: number;
   windowsPending: number;
+  simulatedDeposits: number;
 }
 
 /** First line of the page: what experiment, what state, how fresh, how complete. */
-export function StatusBanner({ experiment, usersAssigned, dataThrough, asOf, windowsClosed, windowsPending }: Props) {
+export function StatusBanner({ experiment, usersAssigned, dataThrough, asOf, windowsClosed, windowsPending, simulatedDeposits }: Props) {
   const status =
     experiment.status === "running" ? (
       <Pill tone="success">● Corriendo</Pill>
@@ -28,6 +29,11 @@ export function StatusBanner({ experiment, usersAssigned, dataThrough, asOf, win
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
         <span className="font-mono text-xs text-muted">{experiment.id}</span>
         {status}
+        {simulatedDeposits > 0 ? (
+          <Pill tone="warning">
+            incluye {formatInt(simulatedDeposits)} depósito{simulatedDeposits === 1 ? "" : "s"} simulado{simulatedDeposits === 1 ? "" : "s"}
+          </Pill>
+        ) : null}
         <span className="text-muted">·</span>
         <span>
           Cohorte: registrados desde <span className="font-mono">{formatUtc(experiment.startsAt)}</span> ·{" "}

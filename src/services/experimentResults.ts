@@ -91,6 +91,8 @@ export interface ClientFunnelStats {
 export interface DataQuality {
   inbox: InboxStats;
   duplicatesIgnored: number;
+  /** Deposits written by /simulate (ids dep_sim_*). Zero in a clean replay. */
+  simulatedDeposits: number;
   deposits: { total: number; completed: number; failed: number; conflict: number; received: number };
   unknownUsers: number;
   assignmentsMissingForDepositors: number;
@@ -330,6 +332,7 @@ function dataQuality(db: Db, deposits: DepositRecord[], users: User[], variantBy
   return {
     inbox,
     duplicatesIgnored: inbox.deliveries - inbox.uniqueEvents,
+    simulatedDeposits: webhook.filter((d) => d.id.startsWith("dep_sim_")).length,
     deposits: {
       total: webhook.length,
       completed: byStatus.completed?.length ?? 0,

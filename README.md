@@ -65,6 +65,8 @@ app — y lo compara con `/api/results`. Termina en `MATCH`.
 
 ## Qué hay en cada URL
 
+Todas las páginas comparten la barra de navegación de arriba.
+
 | URL | Qué es |
 |---|---|
 | `/` | Índice: un usuario de muestra por país y uno anterior al experimento, con enlaces a su pantalla |
@@ -72,6 +74,7 @@ app — y lo compara con `/api/results`. Termina en `MATCH`.
 | `/u/<usuario>/fund?preview=A` / `?preview=B` | La misma pantalla en una variante elegida, sin asignar ni registrar eventos |
 | `/results` | El resultado del experimento para Growth |
 | `/funnel` | Dónde se traba la gente: usuarios únicos por paso, por variante y por método; se actualiza sola |
+| `/simulate` | Simulador de recorridos: genera usuarios que ven, eligen, copian y transfieren, por los mismos servicios que el tráfico real; se borra de un botón |
 | `/admin` | Kill switch: pausar / reanudar sin deploy |
 | `/api/results`, `/api/funnel` | Lo mismo que las páginas, en JSON (incluyen la definición de la métrica y el veredicto) |
 | `/api/track` | Donde la pantalla envía sus eventos |
@@ -135,6 +138,9 @@ data/, simulator/  el material del enunciado, sin modificar
 - **`/` dice «Base vacía».** Falta `npm run seed`.
 - **Corrí el simulador dos veces y los números no cambiaron.** Es la idea. Lo
   único que sube es «webhooks recibidos» en la calidad de datos de `/results`.
+- **`npm run verify` dice MISMATCH.** Casi seguro hay datos simulados desde
+  `/simulate` (la cabecera de `/results` lo avisa). Borralos desde esa misma
+  página y volvé a correrlo.
 - **Windows.** Los scripts `dev`/`start` fijan `TZ=UTC` con sintaxis de shell
   POSIX; en PowerShell usá `$env:TZ='UTC'; npx next dev` (o WSL). El diseño no
   depende de la zona horaria del proceso — `npm run test:tz` lo prueba — pero

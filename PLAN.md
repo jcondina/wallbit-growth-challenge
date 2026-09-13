@@ -207,6 +207,8 @@ under any timezone and what you can extend live without touching I/O.
 │   │   ├── funding/              FundingScreen (client), MethodCard, InstructionsPanel, Ribbon
 │   │   ├── funnel/               AutoRefresh (client)
 │   │   ├── admin/                StatusSwitch (client)
+│   │   ├── nav/                  SiteNav (client)
+│   │   ├── simulate/             Simulator (client)
 │   │   └── results/              StatusBanner, VerdictBlock, BaselineCard, MetricTables, CountryTable, DataQualityTable, PowerTable
 │   ├── lib/
 │   │   ├── analytics.ts          client track(): envelope, session id, sendBeacon
@@ -974,6 +976,20 @@ models stay ≈ 5 ms. Production latencies: `/api/results` ≈ 8 ms, `/results`
 ≈ 14 ms, `/funnel` ≈ 12 ms, funding screen ≈ 4 ms. A zero-delay replay
 (`npm run replay -- --delay-ms 0`) takes ≈ 5 s and is client-bound; the
 default 90 s is the simulator's own 120 ms pause.
+
+**Simulator and navigation** (after the hardening pass). `/simulate` +
+`services/simulateJourney.ts`: eight journeys (viewed, looper, selected,
+copied, deposited, late, failed, expanded) emitted through the real
+`trackEvent` and the HMAC-signed `ingestWebhook`, with deposit times placed
+relative to the user's signup so the activation rule treats them like real
+ones; a seeded batch mode over fresh enrolled users; everything tagged
+(`sim:` sessions, `dep_sim_*` / `evt_sim_*` ids) and removable from the same
+page. `/results` shows a warning pill and a data-quality row while simulated
+deposits exist; `verify.py` will (correctly) report MISMATCH until they are
+removed. Test: deleting simulated data restores results and funnel byte for
+byte. `components/nav/SiteNav.tsx` in the root layout: every route one click
+away, current section highlighted, no prefetch. Journey constants live in
+`content/journeys.ts` so the client bundle never imports the service.
 
 ---
 

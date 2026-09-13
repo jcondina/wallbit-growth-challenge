@@ -49,6 +49,7 @@ export default async function ResultsPage() {
         asOf={r.asOf}
         windowsClosed={assigned - pending}
         windowsPending={pending}
+        simulatedDeposits={r.dataQuality.simulatedDeposits}
       />
 
       <VerdictBlock variants={r.variants} comparison={r.comparison} verdict={r.verdict} />

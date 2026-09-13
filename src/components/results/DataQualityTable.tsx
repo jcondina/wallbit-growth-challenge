@@ -14,6 +14,7 @@ export function DataQualityTable({ dq }: { dq: DataQuality }) {
         ["Duplicados ignorados", formatInt(dq.duplicatesIgnored), "mismo event_id entregado más de una vez"],
         ["Reenvíos con id nuevo", formatInt(i.resends), "mismo depósito y tipo bajo otro event_id: no cambian el estado"],
         ["Depósitos", `${formatInt(dq.deposits.total)} = ${formatInt(dq.deposits.completed)} ✓ · ${formatInt(dq.deposits.failed)} ✗ · ${formatInt(dq.deposits.conflict)} conflicto · ${formatInt(dq.deposits.received)} en curso`, "estado final por deposit_id"],
+        ["Depósitos simulados", formatInt(dq.simulatedDeposits), "escritos desde /simulate; se borran desde ahí"],
         ["Anomalías", formatInt(i.withAnomalies), "usuario o método desconocido, monto no positivo, depósito anterior al registro, fecha futura"],
         ["Firmas inválidas aceptadas", formatInt(i.unsigned), "solo posible con WEBHOOK_VERIFY_SIGNATURE=false"],
         ["Header ≠ body", formatInt(i.headerMismatches), "el body firmado manda"],
