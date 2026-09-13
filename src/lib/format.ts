@@ -39,6 +39,9 @@ export const formatP = (p: number | null): string => {
   return `p = ${(p < 0.01 ? es3 : es2).format(p)}`;
 };
 
+/** z statistics and similar: one decimal, es-AR separators. */
+export const formatNum1 = (n: number | null): string => (n === null ? "—" : es1.format(n));
+
 export const formatUsd = (n: number | null): string => (n === null ? "—" : `$ ${es.format(n)}`);
 
 export const formatDays = (d: number | null): string => (d === null ? "—" : `${es1.format(d)} d`);

@@ -203,10 +203,11 @@ under any timezone and what you can extend live without touching I/O.
 │   │       ├── funnel/route.ts                 GET
 │   │       └── admin/experiments/[id]/status/route.ts   POST
 │   ├── components/
-│   │   ├── ui/                   Page, Section, Card, Stat, DataTable, Pill, Callout, Disclosure, Button (CIBar arrives with /results)
+│   │   ├── ui/                   Page, Section, Card, Stat, DataTable, Pill, Callout, Disclosure, Button, CIBar
 │   │   ├── funding/              FundingScreen (client), MethodCard, InstructionsPanel, Ribbon
 │   │   ├── funnel/               AutoRefresh (client)
-│   │   └── results/              Verdict, PrimaryTable, BaselineCard, MechanismTable, GuardrailsTable, CountryTable, DataQuality, Power
+│   │   ├── admin/                StatusSwitch (client)
+│   │   └── results/              StatusBanner, VerdictBlock, BaselineCard, MetricTables, CountryTable, DataQualityTable, PowerTable
 │   ├── lib/
 │   │   ├── analytics.ts          client track(): envelope, session id, sendBeacon
 │   │   └── format.ts             es-AR number/percent/date formatting (the only place Instant meets a locale)
@@ -909,10 +910,22 @@ defined during render. `typecheck` now runs `next typegen` first so
 click-through produced viewed → selected → copied → expanded → left (beacon
 on navigation), preview stored nothing, the ineligible ribbon rendered.
 
-**Phase 6 — Results page, admin, index.**
+**Phase 6 — Results page, admin, index.** ✅ `phase-6` commit.
 `/results` per §10.1; `/admin` + `experimentControl.ts`; `/`. *Accept:* page
 matches the spec in light and dark; pause → funding page shows A with the
 paused ribbon and `/results` shows the banner; resume restores.
+*As built:* `components/results/` = StatusBanner, VerdictBlock (callout +
+stat tiles + table + CIBar + definition), BaselineCard (three definitions +
+sanity callout), MetricTables (mechanism incl. client rows, guardrails),
+CountryTable, DataQualityTable, PowerTable; three `Disclosure`s collapsed
+by default. `components/ui/CIBar.tsx` is the page's only visual. Admin:
+`services/experimentControl.ts`, `POST /api/admin/experiments/[id]/status`
+(zod body, 400/404), `components/admin/StatusSwitch.tsx` (confirm on pause,
+`router.refresh()`). Index lists the first eligible user per country + one
+pre-experiment user with open/preview links (`prefetch={false}`). Verified
+live in both color schemes; pause/resume exercised through the API against
+a B-assigned user and a fresh user (not enrolled while paused, enrolled on
+first touch after resume). `next build` shows every data route as ƒ.
 
 **Phase 7 — Documentation and rehearsal.**
 `README.md` (ES) with checkpoints and "Dónde mirar"; `ENTREGA.md` complete

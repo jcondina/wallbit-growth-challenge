@@ -35,3 +35,11 @@ export const COUNTRY_NAMES: Record<string, string> = {
 };
 
 export const countryName = (code: string): string => COUNTRY_NAMES[code] ?? code;
+
+/** "AR" → 🇦🇷 via regional indicator symbols. */
+export const flagEmoji = (code: string): string =>
+  code
+    .toUpperCase()
+    .split("")
+    .map((c) => String.fromCodePoint(0x1f1e6 + c.charCodeAt(0) - 65))
+    .join("");
