@@ -990,8 +990,10 @@ removed. Test: deleting simulated data restores results and funnel byte for
 byte. `components/nav/SiteNav.tsx` in the root layout: every route one click
 away, current section highlighted, no prefetch. `/` is a landing page: the
 question, the case, two CTAs, four live numbers, the current verdict, the
-hypothesis as two cards, four action cards, the five-step flow, and the
-sample-user table. Journey constants live in
+hypothesis as two cards, four action cards, the five-step flow, and a
+hand-off to `/users`, which holds the sample-user table plus an
+open-any-id form (`components/users/OpenUserForm.tsx`). Nav: Inicio ·
+Usuarios · Resultados · Embudo · Simulador · Kill switch. Journey constants live in
 `content/journeys.ts` so the client bundle never imports the service.
 
 ---

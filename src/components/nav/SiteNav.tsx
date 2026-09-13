@@ -9,7 +9,8 @@ import { usePathname } from "next/navigation";
  * track a user the visitor never opened.
  */
 const ROUTES: { href: string; label: string; match: (p: string) => boolean }[] = [
-  { href: "/", label: "Usuarios", match: (p) => p === "/" || p.startsWith("/u/") },
+  { href: "/", label: "Inicio", match: (p) => p === "/" },
+  { href: "/users", label: "Usuarios", match: (p) => p.startsWith("/users") || p.startsWith("/u/") },
   { href: "/results", label: "Resultados", match: (p) => p.startsWith("/results") },
   { href: "/funnel", label: "Embudo", match: (p) => p.startsWith("/funnel") },
   { href: "/simulate", label: "Simulador", match: (p) => p.startsWith("/simulate") },

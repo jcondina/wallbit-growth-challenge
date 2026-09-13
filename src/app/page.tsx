@@ -1,17 +1,14 @@
 import Link from "next/link";
 import { connection } from "next/server";
 import { Card } from "@/components/ui/Card";
-import { DataTable } from "@/components/ui/DataTable";
 import { Pill } from "@/components/ui/Pill";
 import { Section } from "@/components/ui/Section";
-import { countryName, flagEmoji } from "@/content/copy";
 import { verdictText } from "@/content/verdict";
 import { FUNDING_EXPERIMENT, isEligible } from "@/domain/experiment";
 import { getDb } from "@/infra/db";
-import { getAssignment } from "@/infra/repos/assignments";
 import { getExperiment } from "@/infra/repos/experiments";
 import { listUsers } from "@/infra/repos/users";
-import { formatInt, formatPct, formatUtc } from "@/lib/format";
+import { formatInt, formatPct } from "@/lib/format";
 import { experimentResults } from "@/services/experimentResults";
 import { funnelResults } from "@/services/funnelResults";
 
@@ -39,14 +36,7 @@ export default async function Home() {
   const B = results.variants.B;
   const eligible = users.filter((u) => isEligible(experiment, u));
   const firstPerCountry = [...Map.groupBy(eligible, (u) => u.country).values()].map((group) => group[0]);
-  const preExperiment = users.find((u) => !isEligible(experiment, u));
-  const samples = [...firstPerCountry, ...(preExperiment ? [preExperiment] : [])];
-
-  const link = (href: string, label: string) => (
-    <Link href={href} prefetch={false} className="underline">
-      {label}
-    </Link>
-  );
+  const firstUser = firstPerCountry[0]?.id ?? "usr_000871";
 
   return (
     <main className="mx-auto w-full max-w-[880px] px-5 py-10">
@@ -116,7 +106,7 @@ export default async function Home() {
       {/* ---- what you can do here -------------------------------------------- */}
       <Section title="Qué podés hacer acá" description="Cuatro lugares, un mismo dato de fondo: todo lee la misma base.">
         <div className="grid gap-4 sm:grid-cols-2">
-          <Action href={`/u/${samples[0]?.id ?? "usr_000871"}/fund`} title="Abrir la pantalla como un usuario" cta="Entrar como usuario">
+          <Action href={`/u/${firstUser}/fund`} title="Abrir la pantalla como un usuario" cta="Entrar como usuario">
             Ves exactamente lo que ve ese usuario: su variante, su país, sus métodos. Con <span className="font-mono">?preview=A|B</span> ves la otra sin
             registrar nada.
           </Action>
@@ -154,33 +144,17 @@ export default async function Home() {
         </ol>
       </Section>
 
-      {/* ---- start here: sample users ---------------------------------------- */}
-      <Section
-        title="Empezá por acá: usuarios de muestra"
-        description="El primer registro elegible de cada país, más uno anterior al experimento (ve la lista completa y no cuenta). «abrir» registra eventos de verdad; «preview» no."
-      >
-        <DataTable
-          columns={[{ header: "Usuario" }, { header: "País" }, { header: "Registro" }, { header: "Variante" }, { header: "Pantalla" }]}
-          rows={samples.map((u) => {
-            const a = getAssignment(db, experiment.id, u.id);
-            const eligibleUser = isEligible(experiment, u);
-            return [
-              <span key="id" className="font-mono text-xs">{u.id}</span>,
-              `${flagEmoji(u.country)} ${countryName(u.country)}`,
-              <span key="t" className="text-muted">{formatUtc(u.createdAt)}</span>,
-              a ? <Pill tone={a.variant === "B" ? "accent" : "neutral"}>{a.variant}</Pill> : eligibleUser ? <Pill tone="warning">sin asignar</Pill> : <Pill>no elegible</Pill>,
-              <span key="l" className="flex flex-wrap gap-3">
-                {link(`/u/${u.id}/fund`, "abrir")}
-                <span className="text-muted">
-                  preview {link(`/u/${u.id}/fund?preview=A`, "A")} · {link(`/u/${u.id}/fund?preview=B`, "B")}
-                </span>
-              </span>,
-            ];
-          })}
-        />
-        <p className="text-xs text-muted">
-          Sin login por diseño: la URL dice quién es el usuario. Para pausar el experimento sin deploy, {link("/admin", "kill switch")}.
-        </p>
+      {/* ---- hand-off to the users page --------------------------------------- */}
+      <Section title="Empezá por acá" description="Un usuario por país, uno anterior al experimento, o cualquier id que escribas.">
+        <Card className="flex flex-wrap items-center justify-between gap-4">
+          <p className="text-sm text-muted">
+            Sin login por diseño: la URL dice quién es el usuario. «Abrir» registra eventos de verdad; «preview» muestra una variante sin
+            asignar ni registrar nada.
+          </p>
+          <Link href="/users" prefetch={false} className="rounded-md bg-accent px-4 py-2 text-sm font-medium text-white hover:opacity-90">
+            Ver usuarios →
+          </Link>
+        </Card>
       </Section>
       </div>
     </main>
