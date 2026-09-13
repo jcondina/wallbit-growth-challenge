@@ -1,5 +1,5 @@
 import { type Instant, instant } from "@/domain/time";
-import { type Db, bool, queryOne, queryRow } from "../db";
+import { type Db, bool, queryOne, queryRow, run } from "../db";
 
 /** One row per delivery the provider made, deduplicated by event_id. */
 export interface InboxEntry {
@@ -40,15 +40,12 @@ const toEntry = (r: Row): InboxEntry => ({
 
 /** Dedupe layer 1. Returns true for a first delivery, false for a redelivery of the same event_id. */
 export function insertInboxIfMissing(db: Db, e: InboxEntry): boolean {
-  const result = db
-    .prepare(`
+  return run(db, `
       INSERT OR IGNORE INTO webhook_inbox
         (event_id, event_type, deposit_id, occurred_at, received_at,
          signature_ok, header_mismatch, anomalies, payload)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `)
-    .run(
-      e.eventId,
+    `, e.eventId,
       e.eventType,
       e.depositId,
       e.occurredAt,
@@ -56,19 +53,17 @@ export function insertInboxIfMissing(db: Db, e: InboxEntry): boolean {
       bool(e.signatureOk),
       bool(e.headerMismatch),
       e.anomalies.length === 0 ? null : JSON.stringify(e.anomalies),
-      e.payload,
-    );
-  return result.changes === 1;
+      e.payload,) === 1;
 }
 
 /** A redelivery of a known event_id: nothing to apply, but the count is evidence for the data-quality panel. */
 export function countRedelivery(db: Db, eventId: string): void {
-  db.prepare("UPDATE webhook_inbox SET deliveries = deliveries + 1 WHERE event_id = ?").run(eventId);
+  run(db, "UPDATE webhook_inbox SET deliveries = deliveries + 1 WHERE event_id = ?", eventId);
 }
 
 /** Anomalies the reducer discovers are only known after the row exists. */
 export function updateInboxAnomalies(db: Db, eventId: string, anomalies: string[]): void {
-  db.prepare("UPDATE webhook_inbox SET anomalies = ? WHERE event_id = ?").run(
+  run(db, "UPDATE webhook_inbox SET anomalies = ? WHERE event_id = ?", 
     anomalies.length === 0 ? null : JSON.stringify(anomalies),
     eventId,
   );

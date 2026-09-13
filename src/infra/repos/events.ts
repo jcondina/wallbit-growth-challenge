@@ -1,6 +1,6 @@
 import type { EventEnvelope, EventName, EventSource } from "@/domain/events";
 import { instant } from "@/domain/time";
-import { type Db, nullable, queryAll, queryRow } from "../db";
+import { type Db, nullable, queryAll, queryRow, run } from "../db";
 
 interface Row {
   event_id: string;
@@ -34,15 +34,12 @@ const toEvent = (r: Row): EventEnvelope => ({
 
 /** Append-only. Returns true when stored, false when `eventId` was already there. */
 export function insertEventIfMissing(db: Db, e: EventEnvelope): boolean {
-  const result = db
-    .prepare(`
+  return run(db, `
       INSERT OR IGNORE INTO events
         (event_id, name, user_id, occurred_at, recorded_at, source,
          experiment_id, variant_shown, country, session_id, schema_version, props)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `)
-    .run(
-      e.eventId,
+    `, e.eventId,
       e.name,
       e.userId,
       e.occurredAt,
@@ -53,9 +50,7 @@ export function insertEventIfMissing(db: Db, e: EventEnvelope): boolean {
       nullable(e.country),
       nullable(e.sessionId),
       e.schemaVersion,
-      JSON.stringify(e.props),
-    );
-  return result.changes === 1;
+      JSON.stringify(e.props),) === 1;
 }
 
 export function listEventsByUser(db: Db, userId: string): EventEnvelope[] {

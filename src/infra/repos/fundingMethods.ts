@@ -1,5 +1,5 @@
 import type { FundingMethod, MethodKind } from "@/domain/fundingMethod";
-import { type Db, queryAll, queryOne, queryRow } from "../db";
+import { type Db, queryAll, queryOne, queryRow, statement } from "../db";
 
 export type { FundingMethod, MethodKind };
 
@@ -24,7 +24,7 @@ const toMethod = (r: Row): FundingMethod => ({
 });
 
 export function upsertFundingMethods(db: Db, methods: FundingMethod[]): void {
-  const stmt = db.prepare(`
+  const stmt = statement(db, `
     INSERT INTO funding_methods (id, name, kind, currency, countries, settlement_hours, fee_pct)
     VALUES (?, ?, ?, ?, ?, ?, ?)
     ON CONFLICT (id) DO UPDATE SET

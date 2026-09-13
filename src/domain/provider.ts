@@ -16,8 +16,12 @@ import { type Instant, parseInstant } from "./time";
 export const DEPOSIT_EVENT_TYPES = ["received", "completed", "failed"] as const;
 export type DepositEventType = (typeof DEPOSIT_EVENT_TYPES)[number];
 
+// Identifiers are short (evt_000123, dep_100042); the caps only stop abuse.
+const id = z.string().min(1).max(200);
+const code = z.string().min(1).max(16);
+
 export const ProviderEventSchema = z.object({
-  event_id: z.string().min(1),
+  event_id: id,
   type: z.enum(["deposit.received", "deposit.completed", "deposit.failed"]),
   occurred_at: z.string().transform((raw, ctx) => {
     try {
@@ -28,12 +32,12 @@ export const ProviderEventSchema = z.object({
     }
   }),
   data: z.object({
-    deposit_id: z.string().min(1),
-    user_id: z.string().min(1),
-    method_id: z.string().min(1),
+    deposit_id: id,
+    user_id: id,
+    method_id: id,
     amount_usd: z.number().finite(),
-    currency: z.string().min(1),
-    country: z.string().min(1),
+    currency: code,
+    country: code,
   }),
 });
 

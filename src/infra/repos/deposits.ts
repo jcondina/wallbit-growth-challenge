@@ -1,6 +1,6 @@
 import type { DepositState, DepositStatus } from "@/domain/deposit";
 import { type Instant, instant } from "@/domain/time";
-import { type Db, bool, nullable, queryAll, queryOne } from "../db";
+import { type Db, bool, nullable, queryAll, queryOne, run } from "../db";
 
 export type DepositSource = "webhook" | "historical";
 
@@ -79,12 +79,12 @@ const params = (d: DepositRecord) => [
 ];
 
 export function upsertDeposit(db: Db, d: DepositRecord): void {
-  db.prepare(UPSERT).run(...params(d));
+  run(db, UPSERT, ...params(d));
 }
 
 /** For fixtures: insert only if absent (a reseed never touches existing rows). Returns true when inserted. */
 export function insertDepositIfMissing(db: Db, d: DepositRecord): boolean {
-  return db.prepare(INSERT_IF_MISSING).run(...params(d)).changes === 1;
+  return run(db, INSERT_IF_MISSING, ...params(d)) === 1;
 }
 
 export function getDeposit(db: Db, id: string): DepositRecord | null {

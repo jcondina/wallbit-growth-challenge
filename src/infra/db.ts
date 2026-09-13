@@ -1,6 +1,6 @@
 import { mkdirSync, readFileSync } from "node:fs";
 import path from "node:path";
-import { DatabaseSync, type SQLInputValue } from "node:sqlite";
+import { DatabaseSync, type SQLInputValue, type StatementSync } from "node:sqlite";
 
 /**
  * SQLite connection (node:sqlite — no native build step for whoever clones).
@@ -80,15 +80,39 @@ export function nullable<T>(value: T | null | undefined): T | null {
   return value === undefined ? null : value;
 }
 
+// Compiling SQL is the dominant cost of a small query. Statements are cached
+// per connection and per SQL text (the WeakMap lets a closed connection be
+// garbage-collected), so repositories can keep passing plain strings.
+const statementCache = new WeakMap<Db, Map<string, StatementSync>>();
+
+export function statement(db: Db, sql: string): StatementSync {
+  let cache = statementCache.get(db);
+  if (!cache) {
+    cache = new Map();
+    statementCache.set(db, cache);
+  }
+  let stmt = cache.get(sql);
+  if (!stmt) {
+    stmt = db.prepare(sql);
+    cache.set(sql, stmt);
+  }
+  return stmt;
+}
+
 // node:sqlite types every row as Record<string, SQLOutputValue>. Repositories
-// declare the shape they expect; these two helpers are the single place where
+// declare the shape they expect; these helpers are the single place where
 // that declaration is trusted.
 export function queryAll<T>(db: Db, sql: string, ...params: SQLInputValue[]): T[] {
-  return db.prepare(sql).all(...params) as unknown as T[];
+  return statement(db, sql).all(...params) as unknown as T[];
 }
 
 export function queryOne<T>(db: Db, sql: string, ...params: SQLInputValue[]): T | undefined {
-  return db.prepare(sql).get(...params) as unknown as T | undefined;
+  return statement(db, sql).get(...params) as unknown as T | undefined;
+}
+
+/** For INSERT / UPDATE / DELETE; returns the number of affected rows. */
+export function run(db: Db, sql: string, ...params: SQLInputValue[]): number {
+  return Number(statement(db, sql).run(...params).changes);
 }
 
 /** For aggregates (COUNT, SUM, MAX…) which always produce exactly one row. */

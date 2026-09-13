@@ -24,6 +24,8 @@ export async function POST(request: Request) {
     );
 
     switch (outcome.kind) {
+      case "too_large":
+        return Response.json({ error: "body too large", bytes: outcome.bytes }, { status: 413 });
       case "unauthorized":
         return Response.json({ error: "invalid signature", reason: outcome.reason }, { status: 401 });
       case "malformed":

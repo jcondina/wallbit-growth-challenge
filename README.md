@@ -85,7 +85,7 @@ app — y lo compara con `/api/results`. Termina en `MATCH`.
 | `npm run setup` | `npm ci` + base limpia + fixtures |
 | `npm run seed` | Carga `data/*.json` e inscribe a los usuarios elegibles. Idempotente: la segunda vez todo es `+0` |
 | `npm run db:reset` | Borra `var/wallbit.db` |
-| `npm run replay` | Espera a la app, la calienta y corre el simulador con `--stop-on-error`. Acepta los flags del simulador: `npm run replay -- --limit 50` |
+| `npm run replay` | Espera a la app, la calienta y corre el simulador con `--stop-on-error`. Acepta los flags del simulador: `npm run replay -- --limit 50`; con `-- --delay-ms 0` reproduce todo agosto en ~6 s en vez de ~90 s |
 | `npm run verify` | Recomputación independiente en Python contra `/api/results` (`-- --url http://localhost:3001` para otro puerto, `-- --offline` para solo imprimir) |
 | `npm test` | Tests (vitest) |
 | `npm run test:tz` | Los mismos tests bajo UTC, Buenos Aires, Tokio y Chatham (+12:45): tienen que dar idéntico |

@@ -1,6 +1,6 @@
 import type { Variant } from "@/domain/experiment";
 import { type Instant, instant } from "@/domain/time";
-import { type Db, queryAll, queryOne } from "../db";
+import { type Db, queryAll, queryOne, run } from "../db";
 
 export interface Assignment {
   experimentId: string;
@@ -28,13 +28,10 @@ const toAssignment = (r: Row): Assignment => ({
 
 /** Returns true when the row was created, false when the user was already assigned. */
 export function insertAssignmentIfMissing(db: Db, a: Assignment): boolean {
-  const result = db
-    .prepare(`
+  return run(db, `
       INSERT OR IGNORE INTO assignments (experiment_id, user_id, variant, allocation_version, assigned_at)
       VALUES (?, ?, ?, ?, ?)
-    `)
-    .run(a.experimentId, a.userId, a.variant, a.allocationVersion, a.assignedAt);
-  return result.changes === 1;
+    `, a.experimentId, a.userId, a.variant, a.allocationVersion, a.assignedAt) === 1;
 }
 
 export function getAssignment(db: Db, experimentId: string, userId: string): Assignment | null {

@@ -5,7 +5,7 @@ import {
   assertValidAllocation,
 } from "@/domain/experiment";
 import { type Instant, instant } from "@/domain/time";
-import { type Db, nullable, queryOne } from "../db";
+import { type Db, nullable, queryOne, run } from "../db";
 
 interface Row {
   id: string;
@@ -42,14 +42,11 @@ const toExperiment = (r: Row): Experiment => {
  */
 export function insertExperimentIfMissing(db: Db, exp: Experiment): boolean {
   assertValidAllocation(exp.allocation);
-  const result = db
-    .prepare(`
+  return run(db, `
       INSERT OR IGNORE INTO experiments
         (id, name, starts_at, ends_at, window_hours, status, paused_at, allocation, allocation_version)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `)
-    .run(
-      exp.id,
+    `, exp.id,
       exp.name,
       exp.startsAt,
       nullable(exp.endsAt),
@@ -57,9 +54,7 @@ export function insertExperimentIfMissing(db: Db, exp: Experiment): boolean {
       exp.status,
       nullable(exp.pausedAt),
       JSON.stringify(exp.allocation),
-      exp.allocationVersion,
-    );
-  return result.changes === 1;
+      exp.allocationVersion,) === 1;
 }
 
 export function getExperiment(db: Db, id: string): Experiment | null {
@@ -73,5 +68,5 @@ export function setExperimentStatus(
   status: ExperimentStatus,
   pausedAt: Instant | null,
 ): void {
-  db.prepare("UPDATE experiments SET status = ?, paused_at = ? WHERE id = ?").run(status, pausedAt, id);
+  run(db, "UPDATE experiments SET status = ?, paused_at = ? WHERE id = ?", status, pausedAt, id);
 }

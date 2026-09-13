@@ -1,5 +1,5 @@
 import { type Instant, instant } from "@/domain/time";
-import { type Db, queryAll, queryOne, queryRow } from "../db";
+import { type Db, queryAll, queryOne, queryRow, statement } from "../db";
 
 export type KycStatus = "approved" | "pending" | "rejected";
 
@@ -28,7 +28,7 @@ const toUser = (r: Row): User => ({
 });
 
 export function upsertUsers(db: Db, users: User[]): void {
-  const stmt = db.prepare(`
+  const stmt = statement(db, `
     INSERT INTO users (id, email, country, created_at, kyc_status)
     VALUES (?, ?, ?, ?, ?)
     ON CONFLICT (id) DO UPDATE SET

@@ -17,6 +17,7 @@ import { verifySignature } from "./webhookSignature";
  * Webhook ingestion (PROVIDER.md: at-least-once, unordered, resends under
  * new ids, occurred_at is the truth).
  *
+ *   0. body size cap                       → too_large (413)
  *   1. HMAC over the raw bytes            → unauthorized (401)
  *   2. zod contract                        → malformed (400)
  *   3. one transaction:
@@ -42,6 +43,7 @@ export type IngestionAnomaly =
   | "country_mismatch";
 
 export type IngestOutcome =
+  | { kind: "too_large"; bytes: number }
   | { kind: "unauthorized"; reason: "missing" | "malformed" | "mismatch" }
   | { kind: "malformed"; issues: string[] }
   | { kind: "duplicate"; eventId: string }
@@ -75,9 +77,15 @@ export interface IngestDeps {
 /** How far ahead of the server clock an occurred_at may be before it is flagged. */
 export const FUTURE_TOLERANCE = minutes(5);
 
+/** A real provider event is well under 1 KiB; the raw body is stored, so it is capped. */
+export const MAX_BODY_BYTES = 64 * 1024;
+
 export function ingestWebhook(deps: IngestDeps, input: IngestInput): IngestOutcome {
   const { db, clock } = deps;
   const experimentId = deps.experimentId ?? FUNDING_EXPERIMENT.id;
+
+  // 0. size — before doing any work with the bytes
+  if (input.rawBody.length > MAX_BODY_BYTES) return { kind: "too_large", bytes: input.rawBody.length };
 
   // 1. signature — before touching the body
   const check = verifySignature(deps.secret, input.rawBody, input.headers.signature);

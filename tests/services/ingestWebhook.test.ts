@@ -129,6 +129,14 @@ describe("ingestWebhook — rejections (nothing is stored)", () => {
     expect(inboxStats(db).unsigned).toBe(1);
   });
 
+  it("oversized body → too_large before any work; oversized identifiers → malformed", () => {
+    const { db, deps } = fresh();
+    const big = Buffer.from(JSON.stringify({ ...base, pad: "x".repeat(70 * 1024) }), "utf8");
+    expect(ingestWebhook(deps, { rawBody: big, headers: { signature: signBody(SECRET, big) } })).toEqual({ kind: "too_large", bytes: big.length });
+    expect(deliver(deps, { ...base, event_id: "evt_" + "x".repeat(200) })).toMatchObject({ kind: "malformed", issues: [expect.stringContaining("event_id")] });
+    expect(count(db, "webhook_inbox")).toBe(0);
+  });
+
   it("malformed body → malformed, with the reason", () => {
     const { db, deps } = fresh();
     const raw = Buffer.from("{not json", "utf8");

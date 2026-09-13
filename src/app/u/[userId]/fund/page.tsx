@@ -27,6 +27,7 @@ export default async function FundPage({ params, searchParams }: PageProps<"/u/[
 
   const experiment = getExperiment(db, FUNDING_EXPERIMENT.id) ?? FUNDING_EXPERIMENT;
   const previewVariant = typeof preview === "string" && preview !== "" ? preview : null;
+  if (previewVariant !== null && !experiment.allocation.some((a) => a.variant === previewVariant)) notFound();
   const outcome = enrollUser(db, systemClock, user, experiment, { preview: previewVariant });
 
   const catalogue = listFundingMethods(db);

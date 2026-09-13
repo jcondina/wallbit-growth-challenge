@@ -953,6 +953,28 @@ statsByCountry → compare → countryCuts`); `seed.ts` is four named steps;
 `FundingScreen` keeps one `journey` ref instead of five. All of these APIs
 are native in Node ≥ 22 (the `engines` floor).
 
+**Robustness, determinism and performance pass** (after the simplification).
+*Probed live:* empty / non-JSON / array / null bodies, wrong content type,
+unsigned and malformed signatures, string and huge amounts, unicode ids,
+offset and naive timestamps, year 9999, 10 KB ids, 2 MB bodies, nested extra
+fields, header/body mismatch, oversized track props and session ids,
+sendBeacon `text/plain`, admin bad bodies, unknown user page, `preview=Z`,
+`asOf` garbage, GET on POST routes, 30 concurrent identical deliveries and
+100 concurrent mixed ones. *Fixed:* `preview=<unknown>` was a 500 → 404;
+request bodies over 64 KiB → 413 on both `/webhooks/deposits` and
+`/api/track` (the raw payload is stored); identifier length caps in the
+provider schema (200 chars; 16 for currency/country) → 400. Everything else
+already behaved. *Determinism:* `tests/determinism.test.ts` — two
+independent pipelines agree byte for byte; three seeded shuffles and a full
+reverse of the 648 deliveries reproduce the same results and funnel; a double
+delivery changes only the counter. *Performance:* prepared statements are now
+cached per connection (`infra/db.ts › statement()`), which cut seed 29 → 20 ms
+and first-pass ingestion 97 → 38 ms in-process (≈ 0.06 ms per webhook); read
+models stay ≈ 5 ms. Production latencies: `/api/results` ≈ 8 ms, `/results`
+≈ 14 ms, `/funnel` ≈ 12 ms, funding screen ≈ 4 ms. A zero-delay replay
+(`npm run replay -- --delay-ms 0`) takes ≈ 5 s and is client-bound; the
+default 90 s is the simulator's own 120 ms pause.
+
 ---
 
 ## 16. `ENTREGA.md` outline (Spanish, brief; half a page honest beats three pages)
