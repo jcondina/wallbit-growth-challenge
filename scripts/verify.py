@@ -146,7 +146,9 @@ def recompute(allocation):
     return {
         "variants": dict(variants),
         "baseline": baseline,
-        "inbox": {"uniqueEvents": len(seen), "duplicates": duplicates, "resends": resends},
+        "inbox": {"uniqueEvents": len(seen), "resends": resends},
+        "_deliveries_per_pass": len(deliveries),
+        "_duplicates_per_pass": duplicates,
         "deposits": {"total": len(deposits), **{k: by_status.get(k, 0) for k in ("completed", "failed", "conflict", "received")}},
     }
 
@@ -163,13 +165,15 @@ def flatten_app(api):
         out["variants"][name] = {k: g[k] for k in ("users", "activated", "lateConversions", "everConverted")}
     out["baseline"] = {k: api["baseline"][k] for k in ("users", "activated", "initiatedInWindow", "everConverted")}
     dq = api["dataQuality"]
-    out["inbox"] = {"uniqueEvents": dq["inbox"]["uniqueEvents"], "duplicates": dq["duplicatesIgnored"], "resends": dq["inbox"]["resends"]}
+    out["inbox"] = {"uniqueEvents": dq["inbox"]["uniqueEvents"], "resends": dq["inbox"]["resends"]}
     out["deposits"] = {k: dq["deposits"][k] for k in ("total", "completed", "failed", "conflict", "received")}
     return out
 
 
 def rows(d, prefix=""):
     for k, v in d.items():
+        if k.startswith("_"):
+            continue
         if isinstance(v, dict):
             yield from rows(v, f"{prefix}{k}.")
         else:
@@ -207,6 +211,16 @@ def main() -> int:
         ok = v_mine == v_app
         mismatches += 0 if ok else 1
         print(f"  {k:32} {str(v_app):>8} {v_mine:>12}  {'ok' if ok else '<-- MISMATCH'}")
+
+    # Deliveries depend on how many times the simulator ran (the only number a
+    # replay may change), so they are checked for shape, not equality.
+    deliveries = api["dataQuality"]["inbox"]["deliveries"]
+    per_pass = mine["_deliveries_per_pass"]
+    passes, remainder = divmod(deliveries, per_pass)
+    whole = remainder == 0 and passes >= 1
+    mismatches += 0 if whole else 1
+    print(f"  {'inbox.deliveries':32} {deliveries:>8} {per_pass:>12}  "
+          f"{'ok (' + str(passes) + (' pasada' if passes == 1 else ' pasadas') + ' completa' + ('' if passes == 1 else 's') + ')' if whole else '<-- MISMATCH (not a whole number of passes)'}")
 
     a = flat["variants"].get("A", {})
     b = flat["variants"].get("B", {})

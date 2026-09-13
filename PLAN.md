@@ -927,10 +927,18 @@ live in both color schemes; pause/resume exercised through the API against
 a B-assigned user and a fresh user (not enrolled while paused, enrolled on
 first touch after resume). `next build` shows every data route as ƒ.
 
-**Phase 7 — Documentation and rehearsal.**
+**Phase 7 — Documentation and rehearsal.** ✅ `phase-7` commits.
 `README.md` (ES) with checkpoints and "Dónde mirar"; `ENTREGA.md` complete
 with real numbers; full rehearsal (§17); final commit. *Accept:* a clean clone
 following the README reaches `MATCH` without touching anything else.
+*As built:* rehearsed from a fresh `git clone` on port 3001: `npm run setup`
+→ seed counts; `APP_URL=… npm run replay` → 648×200; `/api/results` →
+A 113/296, B 97/304; `npm run verify -- --url …` → `MATCH`; second replay →
+`MATCH` again; `test:tz` 4×142; lint, typecheck, build clean. The rehearsal
+caught one real defect: `verify.py` compared *duplicates ignored*, which
+legitimately grows with every replay; it now reports deliveries as
+"N pasadas completas" and only fails when the count is not a whole number of
+passes. `ENTREGA.md › Tiempo` carries a TODO for the human's own hours.
 
 ---
 
