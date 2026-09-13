@@ -203,8 +203,9 @@ under any timezone and what you can extend live without touching I/O.
 │   │       ├── funnel/route.ts                 GET
 │   │       └── admin/experiments/[id]/status/route.ts   POST
 │   ├── components/
-│   │   ├── ui/                   Page, Section, Card, Stat, DataTable, Pill, Callout, Disclosure, Button, CIBar
-│   │   ├── funding/              FundingScreen (client), MethodCard, MethodList, InstructionsPanel, Ribbon
+│   │   ├── ui/                   Page, Section, Card, Stat, DataTable, Pill, Callout, Disclosure, Button (CIBar arrives with /results)
+│   │   ├── funding/              FundingScreen (client), MethodCard, InstructionsPanel, Ribbon
+│   │   ├── funnel/               AutoRefresh (client)
 │   │   └── results/              Verdict, PrimaryTable, BaselineCard, MechanismTable, GuardrailsTable, CountryTable, DataQuality, Power
 │   ├── lib/
 │   │   ├── analytics.ts          client track(): envelope, session id, sendBeacon
@@ -888,11 +889,25 @@ the control rate and the observed signup pace (1 639/month = 600 users in 11
 days), not the planning-time 600/month assumption — so "+5 pp" reads ~1.8
 months here. Live: `npm run verify` → `MATCH` on 20 fields.
 
-**Phase 5 — UI system, funding screens, tracking, funnel.**
+**Phase 5 — UI system, funding screens, tracking, funnel.** ✅ `phase-5` commit.
 tokens + primitives; `FundingScreen` A/B + instructions + ribbon + preview;
 `analytics.ts`, `/api/track`, `trackEvent.ts`; `funnelResults.ts`, `/funnel`,
 `/api/funnel`. *Accept:* clicking through a user produces the expected event
 sequence; `/funnel` shows it; preview emits nothing; events tests green.
+*As built:* both variants require one tap to reveal instructions ("Ver
+datos" in A, a primary "Ver datos para transferir" on B's hero) so the
+select → copy step is symmetric; B removes the *choice*, not the reveal.
+`services/enrollUser.ts` returns a reason (`preview | ineligible | assigned |
+enrolled | paused | finished`) that the page turns into the ribbon. The
+funnel groups a user by the variant shown at first exposure and counts only
+enrolled + exposed users; `unexposedDepositors` shows the simulated month.
+`/funnel` auto-refreshes every 5 s (client `router.refresh()`), which is the
+live demo. Timing helpers (`nowMs`, `msSince`) live in `lib/analytics.ts`
+because the React Compiler lint rejects `performance.now()` in handlers
+defined during render. `typecheck` now runs `next typegen` first so
+`PageProps<"/u/[userId]/fund">` exists on a clean clone. Verified live: the
+click-through produced viewed → selected → copied → expanded → left (beacon
+on navigation), preview stored nothing, the ineligible ribbon rendered.
 
 **Phase 6 — Results page, admin, index.**
 `/results` per §10.1; `/admin` + `experimentControl.ts`; `/`. *Accept:* page

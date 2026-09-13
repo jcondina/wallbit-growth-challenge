@@ -19,3 +19,19 @@ export const COUNTRY_CUT_CAVEAT =
   "generar hipótesis, no para tomar decisiones.";
 
 export const CLIENT_DATA_UNAVAILABLE = "sin datos en la simulación";
+
+export const COUNTRY_NAMES: Record<string, string> = {
+  AR: "Argentina",
+  MX: "México",
+  CO: "Colombia",
+  BR: "Brasil",
+  PE: "Perú",
+  UY: "Uruguay",
+  BO: "Bolivia",
+  DO: "República Dominicana",
+  GT: "Guatemala",
+  ES: "España",
+  US: "Estados Unidos",
+};
+
+export const countryName = (code: string): string => COUNTRY_NAMES[code] ?? code;

@@ -12,7 +12,7 @@
     "replay": "bash scripts/replay.sh",
     "verify": "python3 scripts/verify.py",
     "lint": "eslint",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
     "test:tz": "TZ=UTC vitest run && TZ=America/Argentina/Buenos_Aires vitest run && TZ=Asia/Tokyo vitest run && TZ=Pacific/Chatham vitest run"
   },

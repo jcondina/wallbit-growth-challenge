@@ -1,33 +1,94 @@
 @import "tailwindcss";
 
 /*
- * Design tokens. Light values on :root, dark values under the media query.
- * The full token set (surface, border, muted, accent, semantic tones) lands
- * with the UI primitives; until then only the page ground is defined.
+ * Design tokens.
+ *
+ * Light values on :root, dark values under prefers-color-scheme; the page
+ * follows the OS (no toggle). `color-scheme: light dark` lets the browser
+ * theme scrollbars and form controls to match. Semantic tones (success /
+ * warning / danger) are reserved for a significant verdict or a breached
+ * guardrail — everything else stays neutral on purpose.
  */
 :root {
   color-scheme: light dark;
-  --background: #fafaf9;
-  --foreground: #1c1917;
+
+  --bg: #fafaf9;
+  --surface: #ffffff;
+  --surface-muted: #f5f5f4;
+  --line: #e7e5e4;
+  --text: #1c1917;
+  --muted: #78716c;
+
+  --accent: #1d4ed8;
+  --accent-soft: #dbeafe;
+  --success: #15803d;
+  --success-soft: #dcfce7;
+  --warning: #b45309;
+  --warning-soft: #fef3c7;
+  --danger: #b91c1c;
+  --danger-soft: #fee2e2;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0c0a09;
-    --foreground: #e7e5e4;
+    --bg: #0c0a09;
+    --surface: #1c1917;
+    --surface-muted: #292524;
+    --line: #34302d;
+    --text: #e7e5e4;
+    --muted: #a8a29e;
+
+    --accent: #60a5fa;
+    --accent-soft: #172554;
+    --success: #4ade80;
+    --success-soft: #052e16;
+    --warning: #fbbf24;
+    --warning-soft: #422006;
+    --danger: #f87171;
+    --danger-soft: #450a0a;
   }
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-line: var(--line);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+  --radius-card: 10px;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
   font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Native disclosure: keep the marker (it is the affordance) but size it. */
+details > summary {
+  cursor: pointer;
+  list-style: revert;
+}
+details > summary::-webkit-details-marker {
+  display: revert;
 }

@@ -1,6 +1,6 @@
 import type { EventEnvelope, EventName, EventSource } from "@/domain/events";
 import { instant } from "@/domain/time";
-import { type Db, nullable, queryAll } from "../db";
+import { type Db, nullable, queryAll, queryRow } from "../db";
 
 interface Row {
   event_id: string;
@@ -62,6 +62,22 @@ export function listEventsByUser(db: Db, userId: string): EventEnvelope[] {
   return (
     queryAll<Row>(db, "SELECT * FROM events WHERE user_id = ? ORDER BY occurred_at, rowid", userId)
   ).map(toEvent);
+}
+
+/** Everything stamped with the experiment, oldest first — the funnel's input. */
+export function listEventsForExperiment(db: Db, experimentId: string): EventEnvelope[] {
+  return (
+    queryAll<Row>(db, "SELECT * FROM events WHERE experiment_id = ? ORDER BY occurred_at, rowid", experimentId)
+  ).map(toEvent);
+}
+
+/** Client events whose variant_shown disagrees with the stored assignment (paused experiment, or a bug). */
+export function countVariantMismatches(db: Db, experimentId: string): number {
+  return queryRow<{ n: number }>(db, `
+      SELECT COUNT(*) AS n FROM events e
+      JOIN assignments a ON a.experiment_id = e.experiment_id AND a.user_id = e.user_id
+      WHERE e.experiment_id = ? AND e.source = 'client' AND e.variant_shown != a.variant
+    `, experimentId).n;
 }
 
 export function listRecentEvents(db: Db, limit: number): EventEnvelope[] {
