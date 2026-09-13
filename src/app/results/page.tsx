@@ -3,6 +3,7 @@ import { connection } from "next/server";
 import { BaselineCard } from "@/components/results/BaselineCard";
 import { CountryTable } from "@/components/results/CountryTable";
 import { DataQualityTable } from "@/components/results/DataQualityTable";
+import { Glossary } from "@/components/results/Glossary";
 import { GuardrailsTable, MechanismTable } from "@/components/results/MetricTables";
 import { PowerTable } from "@/components/results/PowerTable";
 import { StatusBanner } from "@/components/results/StatusBanner";
@@ -38,7 +39,7 @@ export default async function ResultsPage() {
           <Link href="/api/results" prefetch={false} className="underline">
             JSON
           </Link>
-          .
+          . Los términos están explicados en el glosario, al final.
         </>
       }
     >
@@ -76,6 +77,10 @@ export default async function ResultsPage() {
 
       <Disclosure summary="Potencia — qué puede detectar este experimento">
         <PowerTable power={r.power} />
+      </Disclosure>
+
+      <Disclosure summary="Glosario — qué significa cada término de esta página">
+        <Glossary />
       </Disclosure>
     </Page>
   );
