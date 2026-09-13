@@ -328,7 +328,10 @@ CREATE INDEX IF NOT EXISTS events_name_time ON events (name, occurred_at);
 ```
 
 `db.ts`: opens `var/wallbit.db` (path from `DB_PATH`, resolved from
-`process.cwd()`), `PRAGMA journal_mode = WAL`, `PRAGMA busy_timeout = 5000`,
+`process.cwd()`), `PRAGMA journal_mode = WAL`, `PRAGMA synchronous = NORMAL`
+(no fsync per commit; the file cannot corrupt, and a power cut can only lose
+the last commits, which at-least-once resends replay — measured 28 → 1.5 ms
+per simulated journey on an SSD), `PRAGMA busy_timeout = 5000`,
 `PRAGMA foreign_keys = ON`, runs `schema.sql` (all `IF NOT EXISTS`), caches
 the handle on `globalThis` so HMR does not reopen it. Exposes
 `tx(fn)` = `BEGIN IMMEDIATE` / `COMMIT` / `ROLLBACK`.
@@ -987,7 +990,16 @@ ones; a seeded batch mode over fresh enrolled users; everything tagged
 page. `/results` shows a warning pill and a data-quality row while simulated
 deposits exist; `verify.py` will (correctly) report MISMATCH until they are
 removed. Test: deleting simulated data restores results and funnel byte for
-byte. `components/nav/SiteNav.tsx` in the root layout: every route one click
+byte. Guards found by probing the edge cases: a pre-experiment user gets
+nothing simulated (a deposit of theirs would move the baseline — the report
+says `note: "ineligible"`); `expanded` on a control user runs as a plain
+`deposited` (A has no «otras opciones»; `note: "expanded_on_control"`); the
+batch reports `requested` vs `pool` so a short batch explains itself, and the
+page shows how many fresh users remain plus a checkbox to reuse users;
+numeric inputs are clamped client-side; the shuffle is Fisher–Yates over the
+seeded PRNG; deposit ids carry 48 random bits. A paused experiment shows a
+warning on `/simulate` (everything runs as A and counts as a mismatch, as it
+would for real traffic). `components/nav/SiteNav.tsx` in the root layout: every route one click
 away, current section highlighted, no prefetch. `/` is a landing page: the
 question, the case, two CTAs, four live numbers, the current verdict, the
 hypothesis as two cards, four action cards, the five-step flow, and a

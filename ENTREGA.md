@@ -297,8 +297,18 @@ Entiendo cada línea y puedo extenderla.
 
 ## Tiempo
 
-<!-- TODO(juani): completar. Referencia: la sesión de planificación e implementación con Claude Code corrió de ~16:00 a ~00:30 en un mismo día (≈ 8,5 h de reloj), en siete fases. -->
-Aproximadamente ___ horas, incluyendo la planificación. Más que las 4 del
-enunciado: preferí terminar cada pieza antes que entregar ocho a medio
-hacer, y el tiempo extra fue sobre todo en los casos límite de la ingesta y en
-que el tablero no se pueda leer mal.
+Unas 11 horas de reloj, en tres tandas:
+
+- **Planificación, ~2 h.** Leer el enunciado y los datos, discutir el modelo
+  de tiempo, los casos límite de la ingesta, la línea base y cómo evitar que el
+  tablero se lea mal. De ahí salió `PLAN.md`.
+- **Implementación, ~7 h.** Las siete fases, una por commit, con su gate cada
+  una (tests en cuatro zonas horarias, lint, typecheck, build) y el ensayo en
+  un clon limpio al final. Después una pasada de simplificación, otra de
+  robustez y determinismo, y la documentación.
+- **Después, ~2 h.** El simulador de recorridos, la navegación, la landing y
+  esta última revisión de casos límite.
+
+Más que las 4 del enunciado: preferí terminar cada pieza antes que entregar
+ocho a medio hacer, y el tiempo extra fue sobre todo en los casos límite de la
+ingesta y en que el tablero no se pueda leer mal.

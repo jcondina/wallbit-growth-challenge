@@ -12,3 +12,9 @@ export const JOURNEY_LABEL: Record<Journey, string> = {
   expanded: "Abrió «otras opciones», eligió otro método y depositó con ese",
   looper: "Volvió dos veces sin elegir nada",
 };
+
+/** Why a simulated journey differs from what was asked (see `JourneyNote` in the service). */
+export const NOTE_LABEL = {
+  ineligible: "Anterior al experimento: no está en ninguna variante y un depósito suyo movería la línea base. No se simuló nada.",
+  expanded_on_control: "La variante A no tiene «otras opciones»: se simuló un depósito desde la lista.",
+} as const;

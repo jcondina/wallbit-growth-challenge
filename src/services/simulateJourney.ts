@@ -1,15 +1,16 @@
 import { randomUUID } from "node:crypto";
 import { JOURNEYS, type Journey } from "@/content/journeys";
 import { CONTROL_VARIANT, type Experiment, isEligible } from "@/domain/experiment";
+import type { FundingMethod } from "@/domain/fundingMethod";
 import { eligibleMethodsFor, recommendedMethodFor } from "@/domain/recommendation";
 import { type Clock, type Instant, formatInstant, hours, plus } from "@/domain/time";
-import { type Db, queryRow, run } from "@/infra/db";
+import { type Db, queryAll, queryRow, run } from "@/infra/db";
 import { listAssignments } from "@/infra/repos/assignments";
 import { listDeposits } from "@/infra/repos/deposits";
 import { getExperiment } from "@/infra/repos/experiments";
 import { listFundingMethods } from "@/infra/repos/fundingMethods";
 import { type User, getUser, listUsers } from "@/infra/repos/users";
-import { enrollUser } from "./enrollUser";
+import { type EnrollReason, enrollUser } from "./enrollUser";
 import { type IngestOutcome, ingestWebhook } from "./ingestWebhook";
 import { type TrackOutcome, trackEvent } from "./trackEvent";
 import { signBody } from "./webhookSignature";
@@ -41,14 +42,27 @@ export interface EmittedWebhook {
   outcome: IngestOutcome["kind"];
 }
 
+/**
+ * Why a report differs from what was asked:
+ *   ineligible          — pre-experiment user: nothing emitted. A simulated
+ *                         deposit would land in the baseline cohort and move
+ *                         the number every comparison is anchored on.
+ *   expanded_on_control — variant A has no «ver otras opciones», so the
+ *                         journey ran as a plain "deposited" instead.
+ */
+export type JourneyNote = "ineligible" | "expanded_on_control";
+
 export interface JourneyReport {
   userId: string;
   variantShown: string;
+  /** What the user saw: assigned, paused (control shown), ineligible… */
+  reason: EnrollReason;
+  /** The journey actually run (may differ from the one requested, see `note`). */
   journey: Journey;
-  methodId: string;
+  methodId: string | null;
   events: EmittedEvent[];
   webhooks: EmittedWebhook[];
-  skipped?: string;
+  note: JourneyNote | null;
 }
 
 export interface SimulationDeps {
@@ -67,12 +81,22 @@ export function simulateJourney(deps: SimulationDeps, userId: string, journey: J
   const experiment = getExperiment(db, deps.experimentId ?? "funding_recommended_v1");
   if (!experiment) throw new Error("experiment not found — run npm run seed");
 
-  const variantShown = enrollUser(db, deps.clock, user, experiment).variantShown;
+  const { variantShown, reason } = enrollUser(db, deps.clock, user, experiment);
+  if (reason === "ineligible") {
+    return { userId, variantShown, reason, journey, methodId: null, events: [], webhooks: [], note: "ineligible" };
+  }
+
   const methods = listFundingMethods(db);
   const eligible = eligibleMethodsFor(user.country, methods);
   const recommended = recommendedMethodFor(user.country, methods);
   const others = eligible.filter((m) => m.id !== recommended.id);
   const isB = variantShown !== CONTROL_VARIANT;
+
+  let note: JourneyNote | null = null;
+  if (journey === "expanded" && (!isB || others.length === 0)) {
+    journey = "deposited";
+    note = "expanded_on_control";
+  }
 
   // Which method the journey ends up on. B follows the recommendation unless
   // it deliberately expands; A picks anywhere in the list.
@@ -82,7 +106,7 @@ export function simulateJourney(deps: SimulationDeps, userId: string, journey: J
   // A single per-journey clock: every event lands a few seconds after the last.
   const ticker = steppingClock(deps.clock.now(), rng);
   const sessionId = `sim:${randomUUID().slice(0, 8)}`;
-  const report: JourneyReport = { userId, variantShown, journey, methodId: method.id, events: [], webhooks: [] };
+  const report: JourneyReport = { userId, variantShown, reason, journey, methodId: method.id, events: [], webhooks: [], note };
 
   const emit = (name: string, props: Record<string, unknown>) => {
     const outcome = trackEvent(
@@ -147,7 +171,7 @@ export function simulateJourney(deps: SimulationDeps, userId: string, journey: J
       select("expanded");
       copy();
       left("copied", msToSelect + msToCopy + 1_000);
-      deposit(deps, report, user, experiment, "completed", rng);
+      deposit(deps, report, user, experiment, method, "completed", rng);
       break;
     }
     case "copied":
@@ -158,7 +182,7 @@ export function simulateJourney(deps: SimulationDeps, userId: string, journey: J
       select(isB ? "primary" : "list");
       copy();
       left("copied", msToSelect + msToCopy + 1_000);
-      if (journey !== "copied") deposit(deps, report, user, experiment, journey === "failed" ? "failed" : "completed", rng, journey === "late");
+      if (journey !== "copied") deposit(deps, report, user, experiment, method, journey === "failed" ? "failed" : "completed", rng, journey === "late");
       break;
   }
   return report;
@@ -170,22 +194,22 @@ function deposit(
   report: JourneyReport,
   user: User,
   experiment: Experiment,
+  method: FundingMethod,
   final: "completed" | "failed",
   rng: () => number,
   late = false,
 ) {
-  const depositId = `dep_sim_${randomUUID().slice(0, 8)}`;
+  const depositId = `dep_sim_${randomUUID().replaceAll("-", "").slice(0, 12)}`;
   const receivedAt = plus(user.createdAt, hours(late ? 170 + rng() * 40 : 12 + rng() * 90));
   const finalAt = plus(receivedAt, hours(2 + rng() * 36));
   const amount = Math.round((60 + rng() * 900) * 100) / 100;
-  const currency = listFundingMethods(deps.db).find((m) => m.id === report.methodId)?.currency ?? "USD";
 
   for (const [type, at] of [["received", receivedAt], [final, finalAt]] as const) {
     const payload = {
       event_id: `evt_sim_${randomUUID().slice(0, 8)}`,
       type: `deposit.${type}`,
       occurred_at: formatInstant(at),
-      data: { deposit_id: depositId, user_id: user.id, method_id: report.methodId, amount_usd: amount, currency, country: user.country },
+      data: { deposit_id: depositId, user_id: user.id, method_id: method.id, amount_usd: amount, currency: method.currency, country: user.country },
     };
     const rawBody = Buffer.from(JSON.stringify(payload), "utf8");
     const outcome = ingestWebhook(
@@ -218,16 +242,26 @@ export const DEFAULT_MIX: Record<Journey, number> = {
   expanded: 5,
 };
 
+/**
+ * Users a batch can draw from: enrolled and eligible, and — unless
+ * `freshOnly` is off — without deposits or earlier simulated sessions, so
+ * each journey's effect on the tableros is visible.
+ */
+export function batchPool(db: Db, experiment: Experiment, freshOnly = true): User[] {
+  const enrolled = new Set(listAssignments(db, experiment.id).map((a) => a.userId));
+  const withDeposits = new Set(listDeposits(db).map((d) => d.userId));
+  const simulated = new Set(listSimulatedUserIds(db));
+  return listUsers(db).filter(
+    (u) => enrolled.has(u.id) && isEligible(experiment, u) && (!freshOnly || (!withDeposits.has(u.id) && !simulated.has(u.id))),
+  );
+}
+
 export function simulateBatch(deps: SimulationDeps, options: BatchOptions): JourneyReport[] {
   const { db } = deps;
   const rng = mulberry32(options.seed);
   const experiment = getExperiment(db, deps.experimentId ?? "funding_recommended_v1");
   if (!experiment) throw new Error("experiment not found — run npm run seed");
-
-  const enrolled = new Set(listAssignments(db, experiment.id).map((a) => a.userId));
-  const withDeposits = new Set(listDeposits(db).map((d) => d.userId));
-  let pool = listUsers(db).filter((u) => enrolled.has(u.id) && isEligible(experiment, u));
-  if (options.freshOnly ?? true) pool = pool.filter((u) => !withDeposits.has(u.id) && !hasSimulatedSession(db, u.id));
+  const pool = batchPool(db, experiment, options.freshOnly ?? true);
 
   const mix = { ...DEFAULT_MIX, ...options.mix };
   const total = Object.values(mix).reduce((a, b) => a + b, 0);
@@ -240,15 +274,9 @@ export function simulateBatch(deps: SimulationDeps, options: BatchOptions): Jour
     return "viewed";
   };
 
-  const reports: JourneyReport[] = [];
-  const shuffled = pool.toSorted(() => rng() - 0.5);
-  for (const user of shuffled.slice(0, options.users)) {
-    let journey = pickJourney();
-    // "expanded" only makes sense on variant B; A users get a plain deposit instead.
-    if (journey === "expanded" && enrollUser(db, deps.clock, user, experiment).variantShown === CONTROL_VARIANT) journey = "deposited";
-    reports.push(simulateJourney(deps, user.id, journey, rng));
-  }
-  return reports;
+  return shuffle(pool, rng)
+    .slice(0, options.users)
+    .map((user) => simulateJourney(deps, user.id, pickJourney(), rng));
 }
 
 // ---- bookkeeping ------------------------------------------------------------
@@ -285,8 +313,8 @@ export function deleteSimulatedData(db: Db): SimulatedCounts {
   return before;
 }
 
-function hasSimulatedSession(db: Db, userId: string): boolean {
-  return queryRow<{ n: number }>(db, "SELECT COUNT(*) AS n FROM events WHERE user_id = ? AND session_id LIKE 'sim:%'", userId).n > 0;
+function listSimulatedUserIds(db: Db): string[] {
+  return queryAll<{ user_id: string }>(db, "SELECT DISTINCT user_id FROM events WHERE session_id LIKE 'sim:%'").map((r) => r.user_id);
 }
 
 // ---- helpers ------------------------------------------------------------------
@@ -300,6 +328,16 @@ function steppingClock(start: Instant, rng: () => number): Clock {
       return t;
     },
   };
+}
+
+/** Fisher–Yates on a copy; with a seeded rng the order is reproducible. */
+function shuffle<T>(xs: T[], rng: () => number): T[] {
+  const out = [...xs];
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
 }
 
 /** Small seeded PRNG so a batch is reproducible from its seed. */

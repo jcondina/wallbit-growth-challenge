@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Pill } from "@/components/ui/Pill";
-import { JOURNEYS, JOURNEY_LABEL, type Journey } from "@/content/journeys";
+import { JOURNEYS, JOURNEY_LABEL, NOTE_LABEL, type Journey } from "@/content/journeys";
 import type { JourneyReport, SimulatedCounts } from "@/services/simulateJourney";
 
 interface SampleUser {
@@ -17,16 +17,29 @@ interface SampleUser {
 interface Props {
   samples: SampleUser[];
   counts: SimulatedCounts;
+  /** Enrolled users without deposits or earlier simulations — what a fresh batch can draw from. */
+  freshUsers: number;
 }
 
-type Reply = { reports?: JourneyReport[]; removed?: SimulatedCounts; counts: SimulatedCounts; error?: string };
+type Reply = {
+  reports?: JourneyReport[];
+  requested?: number;
+  pool?: number;
+  removed?: SimulatedCounts;
+  counts: SimulatedCounts;
+  error?: string;
+};
 
-export function Simulator({ samples, counts }: Props) {
+const MAX_BATCH = 600;
+const clampInt = (value: number, min: number, max: number) => Math.min(max, Math.max(min, Math.trunc(Number.isFinite(value) ? value : min)));
+
+export function Simulator({ samples, counts, freshUsers }: Props) {
   const router = useRouter();
   const [userId, setUserId] = useState(samples[0]?.id ?? "");
   const [journey, setJourney] = useState<Journey>("deposited");
   const [users, setUsers] = useState(40);
   const [seed, setSeed] = useState(2026);
+  const [freshOnly, setFreshOnly] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
   const [reply, setReply] = useState<Reply | null>(null);
 
@@ -78,7 +91,7 @@ export function Simulator({ samples, counts }: Props) {
             </select>
           </label>
           <div className="flex items-end">
-            <Button variant="primary" disabled={busy !== null || userId === ""} onClick={() => call("one", { mode: "one", userId, journey })}>
+            <Button variant="primary" disabled={busy !== null || userId.trim() === ""} onClick={() => call("one", { mode: "one", userId: userId.trim(), journey })}>
               {busy === "one" ? "Simulando…" : "Simular"}
             </Button>
           </div>
@@ -93,19 +106,32 @@ export function Simulator({ samples, counts }: Props) {
         </p>
         <div className="mt-4 grid gap-3 sm:grid-cols-[1fr_1fr_auto]">
           <label className="flex flex-col gap-1 text-sm">
-            <span className="text-muted">Usuarios</span>
-            <input type="number" min={1} max={600} value={users} onChange={(e) => setUsers(Number(e.target.value))} className={input} />
+            <span className="text-muted">Usuarios (hasta {MAX_BATCH})</span>
+            <input type="number" min={1} max={MAX_BATCH} value={users} onChange={(e) => setUsers(Number(e.target.value))} className={input} />
           </label>
           <label className="flex flex-col gap-1 text-sm">
             <span className="text-muted">Semilla</span>
             <input type="number" min={0} value={seed} onChange={(e) => setSeed(Number(e.target.value))} className={`${input} font-mono`} />
           </label>
           <div className="flex items-end">
-            <Button variant="primary" disabled={busy !== null} onClick={() => call("batch", { mode: "batch", users, seed })}>
+            <Button
+              variant="primary"
+              disabled={busy !== null}
+              onClick={() => call("batch", { mode: "batch", users: clampInt(users, 1, MAX_BATCH), seed: clampInt(seed, 0, Number.MAX_SAFE_INTEGER), freshOnly })}
+            >
               {busy === "batch" ? "Simulando…" : "Simular lote"}
             </Button>
           </div>
         </div>
+        <label className="mt-3 flex items-center gap-2 text-sm">
+          <input type="checkbox" checked={freshOnly} onChange={(e) => setFreshOnly(e.target.checked)} />
+          <span>
+            Solo usuarios sin depósitos ni simulaciones previas{" "}
+            <span className="text-muted">
+              (quedan {freshUsers}{freshUsers === 0 ? ": borrá los datos simulados o destildá" : ""})
+            </span>
+          </span>
+        </label>
       </Card>
 
       <Card>
@@ -134,7 +160,7 @@ export function Simulator({ samples, counts }: Props) {
               Borrados: {reply.removed.clientEvents} eventos de pantalla, {reply.removed.deposits} depósitos, {reply.removed.webhooks} webhooks.
             </p>
           ) : (
-            <ReportList reports={reply.reports ?? []} />
+            <ReportList reports={reply.reports ?? []} requested={reply.requested} pool={reply.pool} />
           )}
         </Card>
       ) : null}
@@ -142,10 +168,18 @@ export function Simulator({ samples, counts }: Props) {
   );
 }
 
-function ReportList({ reports }: { reports: JourneyReport[] }) {
+function ReportList({ reports, requested, pool }: { reports: JourneyReport[]; requested?: number; pool?: number }) {
   const byJourney = Object.groupBy(reports, (r) => r.journey);
+  const short = requested !== undefined && pool !== undefined && reports.length < requested;
   return (
     <div className="flex flex-col gap-4 text-sm">
+      {short ? (
+        <p className="text-warning">
+          Pediste {requested} y salieron {reports.length}:{" "}
+          {pool === 0 ? "no queda ningún usuario" : `quedaban ${pool} usuario${pool === 1 ? "" : "s"}`} sin depósitos ni simulaciones previas. Borrá los
+          datos simulados o destildá el filtro.
+        </p>
+      ) : null}
       <div className="flex flex-wrap items-center gap-2">
         <span className="font-semibold">{reports.length} recorrido{reports.length === 1 ? "" : "s"} simulado{reports.length === 1 ? "" : "s"}</span>
         {Object.entries(byJourney).map(([j, rs]) => (
@@ -169,8 +203,10 @@ function ReportList({ reports }: { reports: JourneyReport[] }) {
               {r.userId}
             </a>
             <Pill tone={r.variantShown === "B" ? "accent" : "neutral"}>{r.variantShown}</Pill>
+            {r.reason === "paused" || r.reason === "finished" ? <Pill tone="warning">{r.reason === "paused" ? "pausado" : "finalizado"}</Pill> : null}
             <span>{r.journey}</span>
-            <span className="text-muted">{r.methodId}</span>
+            {r.methodId ? <span className="text-muted">{r.methodId}</span> : null}
+            {r.note ? <span className="text-warning">{NOTE_LABEL[r.note]}</span> : null}
             <span className="text-muted">
               {r.events.map((e) => e.name.replace("funding_", "")).join(" → ")}
               {r.webhooks.length ? ` → ${r.webhooks.map((w) => w.type.replace("deposit.", "")).join(" → ")}` : ""}

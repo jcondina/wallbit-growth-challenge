@@ -7,7 +7,7 @@ import { getDb } from "@/infra/db";
 import { getAssignment } from "@/infra/repos/assignments";
 import { getExperiment } from "@/infra/repos/experiments";
 import { listUsers } from "@/infra/repos/users";
-import { simulatedCounts } from "@/services/simulateJourney";
+import { batchPool, simulatedCounts } from "@/services/simulateJourney";
 
 export const metadata = { title: "Simulador · Wallbit experimento" };
 
@@ -37,7 +37,13 @@ export default async function SimulatePage() {
       title="Simulador de recorridos"
       subtitle="Genera lo que el simulador del proveedor no puede: usuarios que abren la pantalla, eligen, copian, transfieren. Todo entra por los mismos servicios que el tráfico real y se puede borrar de un botón."
     >
-      <Simulator samples={samples} counts={simulatedCounts(db)} />
+      {experiment.status !== "running" ? (
+        <Callout tone="warning">
+          El experimento está {experiment.status === "paused" ? "pausado" : "finalizado"}: todo usuario ve la variante A, también los asignados a B.
+          Lo que simules ahora aparece en el embudo como «variante mostrada ≠ asignada», igual que pasaría con tráfico real.
+        </Callout>
+      ) : null}
+      <Simulator samples={samples} counts={simulatedCounts(db)} freshUsers={batchPool(db, experiment).length} />
     </Page>
   );
 }

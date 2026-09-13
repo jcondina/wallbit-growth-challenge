@@ -27,6 +27,11 @@ export function openDb(filePath: string = process.env.DB_PATH ?? DEFAULT_DB_PATH
 
   const db = new DatabaseSync(location);
   db.exec("PRAGMA journal_mode = WAL");
+  // In WAL mode NORMAL skips the fsync on every commit (FULL costs ~6 ms per
+  // transaction on an SSD, which is most of the cost of a webhook or a
+  // tracked event). The file can never corrupt; a power cut may lose the
+  // last commits, which the provider's at-least-once resends would replay.
+  db.exec("PRAGMA synchronous = NORMAL");
   db.exec("PRAGMA busy_timeout = 5000");
   db.exec("PRAGMA foreign_keys = ON");
   db.exec(readFileSync(SCHEMA_PATH, "utf8"));

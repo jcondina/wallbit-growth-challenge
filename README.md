@@ -142,6 +142,12 @@ data/, simulator/  el material del enunciado, sin modificar
 - **`npm run verify` dice MISMATCH.** Casi seguro hay datos simulados desde
   `/simulate` (la cabecera de `/results` lo avisa). Borralos desde esa misma
   página y volvé a correrlo.
+- **El lote simuló menos usuarios de los que pedí (o cero).** Por defecto solo
+  toma usuarios asignados sin depósitos ni simulaciones previas, y la página
+  dice cuántos quedan. Borrá los datos simulados o destildá el filtro.
+- **Simulé un usuario anterior al experimento y no pasó nada.** Es adrede: no
+  está en ninguna variante y un depósito suyo movería la línea base. La
+  respuesta lo dice.
 - **Windows.** Los scripts `dev`/`start` fijan `TZ=UTC` con sintaxis de shell
   POSIX; en PowerShell usá `$env:TZ='UTC'; npx next dev` (o WSL). El diseño no
   depende de la zona horaria del proceso — `npm run test:tz` lo prueba — pero
